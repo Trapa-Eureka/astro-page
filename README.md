@@ -20,6 +20,7 @@ Astro(최신 안정, TS strict) + Keystatic(local 모드, 관리자 UI는 개발
 | `docs/TESTING.md` | 테스트 전략 — 스키마 패리티, dist 검사(브라우저 0) | 테스트 작성 전 |
 | `docs/TASKS.md` | 태스크 백로그 — 에이전트 실행 단위, 완료 기준 | 작업 배정 시 |
 | `docs/WORKFLOW.md` | AI-native 개발 규칙 (공통 + 이 레포 특이사항) | 최초 1회 + 운영 중 참조 |
+| `docs/EVAL-KEYSTATIC.md` | Keystatic 평가 메모 — 이 프로젝트의 진짜 산출물(T10) | 채택 여부 판단 시 |
 
 ## 개발 방식
 
@@ -55,3 +56,4 @@ npm run preview     # dist/ 로컬 미리보기: http://localhost:4321
 - 2026-09-07: **T7 완료** — `scripts/verify/`(vitest verify 프로젝트, cheerio+fs만, 75개 검사) — TESTING.md §4 체크리스트 전 항목: 포스트 페이지·h1 유일성, 내부 링크+앵커 무결성, 404 링크, 페이지네이션 산식, 전 페이지 title/description/OG, rss.xml 파싱·항목 수·draft 부재, sitemap URL 수·draft·keystatic 부재, img alt 100%, 랜드마크·스킵 링크, 외부 origin 참조 0, keystatic·JS런타임 부재, 페이지 용량 100KB, 금지 문자열 스캔. **실제 버그 발견**: 홈(`/`)·`/page/N`에 h1이 아예 없었음 — visually-hidden h1 추가해서 고침. 네거티브 확인: dist의 링크 하나를 실제로 깨서 정확히 그 검사만 실패하는 것 확인 후 원복. `npm run check`(53/53)·`npm run verify`(75/75) 그린.
 - 2026-09-07: **T8 완료** — draft 제외를 dist 전 경로(라우트 부재 + 어디서도 링크 안 됨)로 재확인, `/keystatic` href 스캔 정밀화(경로·JS파일·script태그 3중 확인 — 처음엔 콘텐츠 텍스트 전수 스캔으로 시도했다가 "Shipping a CMS..." 포스트 본문이 정당하게 "Keystatic"을 언급해서 오탐 발생 → href 기반 검사로 교체), 금지 문자열 목록·확장자 확대(.mjs/.json 포함), 페이지 용량 리포트(`scripts/verify/reports/page-sizes.json`, gitignore 대상) 추가. 네거티브 확인(draft 링크 실제로 심어봄) 통과. `npm run check`(53/53)·`npm run verify`(80/80) 그린.
 - 2026-09-08: **T9 완료** — 시드 콘텐츠(발췌·태그) 재검토: 발췌 전부 200자 제한 내(122~148자), 태그 10종 중복 없이 정리돼 있음을 확인, 수정 불필요. 실제 브라우저로 홈/포스트(커버 유무 모두)/태그/about/404/`/keystatic`(dev)를 열어 콘솔 확인 — warning·error 0(React DevTools 안내 같은 정상 INFO 로그만). README 퀵스타트를 실제 명령어·라우트 목록으로 갱신. `npm run check`(53/53)·`npm run verify`(80/80) 그린, `npm run preview` 기동 확인(홈·포스트·rss.xml 200). T0~T9 전부 완료 — 다음은 T10(사람 스모크 + 평가 메모).
+- 2026-09-08: **T10 완료** — `/keystatic`에서 실제로 포스트 신규 작성(커버·저자·태그 포함)→파일 생성 확인→draft 토글→빌드 반영/제외 확인→**삭제**까지 CRUD 전체를 실행(삭제 시 첨부 이미지가 안 지워지는 걸 발견, 수동 정리 후 재확인). `docs/EVAL-KEYSTATIC.md` 작성 — 편집 UX·스키마 표현력(이미지 필드의 image() 비호환, 조건부 필수 미지원)·패리티 유지 비용(실측 근거 포함) 정리, 실서비스 채택은 조건부 권장으로 초안 작성(최종 판단은 사람 몫). 배포 절차를 Cloudflare Pages→Vercel로 전환해 5줄로 문서화(`docs/SPEC.md`·`WORKFLOW.md`도 함께 갱신). 시각 리뷰(서체·간격·모바일 폭)는 WORKFLOW.md §4에 따라 사람 확인 대기. `npm run check`(53/53)·`npm run verify`(80/80) 그린. **T0~T10 전부 완료** — 남은 건 사람의 시각 리뷰 + 평가 메모 최종 승인 + 리포 visibility·배포 실행 여부 결정.

@@ -43,4 +43,5 @@
 - 시각 리뷰·서체 최종안·토큰 값 확정
 - Keystatic 편집 스모크 실행과 평가 메모의 최종 판단(실서비스 채택 여부)
 - 회사명(플레이스홀더) 교체 결정
-- 실배포(Cloudflare Pages) 실행 여부
+- 실배포(Vercel) 실행 여부
+- GitHub 리포(Trapa-Eureka/astro-page) visibility(private→public) 전환 여부
