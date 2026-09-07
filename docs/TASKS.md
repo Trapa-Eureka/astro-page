@@ -27,7 +27,7 @@
 - 목표: `/` 최신순 리스트(PostCard: 제목·저자·날짜·발췌), `paginate()` 10개, `/page/N`.
 - 완료 기준: [ ] publishedPosts 경유(직접 정렬 금지) [ ] 페이지 수 산식 단위 테스트 [ ] check 통과
 
-### T4 (레인 B) — 포스트 상세 · 상태: TODO · 의존: T2
+### T4 (레인 B) — 포스트 상세 · 상태: DONE(2026-09-07) · 의존: T2
 - 목표: `/posts/[slug]` — 메타(저자들·날짜·읽기 시간), Markdoc 렌더, Shiki 코드블록, 태그 링크, 프로즈 스타일 적용.
 - 완료 기준: [ ] readingTime·formatDate lib 사용 [ ] 커버 없는 글 레이아웃 정상 [ ] check 통과
 
