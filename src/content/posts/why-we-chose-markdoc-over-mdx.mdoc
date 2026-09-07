@@ -1,0 +1,30 @@
+---
+title: Why We Chose Markdoc Over MDX
+excerpt: >-
+  MDX gives content authors a full JavaScript runtime. We didn't want that,
+  and Markdoc's more restrained tag syntax turned out to be the better fit.
+pubDate: 2025-12-10
+authors:
+  - dax-oduya
+tags:
+  - astro
+  - content
+draft: false
+---
+MDX lets you drop a React component straight into a Markdown file. That's a genuinely useful capability — and it was also the reason we didn't pick it for a blog with three writers and no plans for interactive content.
+
+## The problem with too much power
+
+Every `import` statement in an MDX file is a component that now needs to keep working, forever, or every post that uses it breaks. For a content-heavy site where the content is supposed to outlive any particular component, that's backwards: the prose should be the stable thing, and it wasn't going to be if it depended on JavaScript.
+
+## What Markdoc gives up
+
+Markdoc's tags are deliberately more constrained than JSX. You can't just import an arbitrary component; you register a fixed set of tags and each one has to be declared with a schema up front. Reaching for something new means editing a config file, not just importing it inline in a draft.
+
+## What that constraint buys back
+
+- Every post is plain, portable Markdown-plus-tags — no build step required to read it
+- Content authors can't accidentally break a page by making a typo in a prop name
+- The set of things a post *can* do is small enough to actually audit
+
+For a marketing or documentation site with real interactivity needs, that trade goes the other way. For us, restraint was the feature.

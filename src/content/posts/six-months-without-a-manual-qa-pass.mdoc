@@ -1,0 +1,35 @@
+---
+title: Six Months Without a Manual QA Pass
+excerpt: >-
+  We replaced our pre-release manual click-through with a build verification
+  suite. Half a year later, here's what it caught and what it still misses.
+pubDate: 2026-02-20
+authors:
+  - priya-castellanos
+tags:
+  - testing
+  - ci-cd
+cover: /posts-images/six-months-without-a-manual-qa-pass/cover.png
+coverAlt: A stylized green checkmark grid representing an automated verification suite.
+draft: false
+---
+Every release used to end with someone opening the staging site and clicking through a checklist by hand: does every page have a title, do the internal links resolve, does the RSS feed still parse. It worked, and it was also the first thing that got skipped when a release was late.
+
+## Turning the checklist into code
+
+The checklist itself was already precise enough to be a spec. We rewrote it as a test suite that runs against the built output — no browser, no live server, just the static files on disk inspected with a DOM parser:
+
+- Every internal link resolves to a real file
+- Every image has alt text
+- The RSS feed item count matches the number of published posts
+- No draft content ships in the production build
+
+None of this requires a browser. A parser and a filesystem are enough to catch the class of bug that used to need a human with a checklist.
+
+## What it caught that we wouldn't have
+
+The suite is unforgiving about things a tired human skips on the fifth release of the week — a missing meta description, a sitemap entry pointing at a page that got renamed. Small, boring bugs that would have shipped anyway because nobody wants to be the person re-clicking every link for the third time that day.
+
+## What it still can't do
+
+It has no opinion on whether the page looks good. Spacing, type scale, whether a headline wraps awkwardly on a small screen — that's still a person looking at a real browser. We didn't eliminate manual review; we shrank it down to the one thing a person is actually good at judging.

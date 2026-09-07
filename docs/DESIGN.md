@@ -26,9 +26,11 @@
 | pubDate | fields.date | coerce.date | 최신순 정렬 키 |
 | authors | fields.array(relationship→authors) | array(reference) | 1명 이상 |
 | tags | fields.array(text) | array(string) | 소문자 케밥(정규화 함수 경유) |
-| cover | fields.image(옵션) + coverAlt(text) | image()+string | **cover 있으면 alt 필수** (refine) |
+| cover | fields.image(옵션) + coverAlt(text) | string(옵션)+string | **cover 있으면 alt 필수** (refine) |
 | draft | fields.checkbox(기본 false) | boolean | 프로덕션 제외 |
 | content | fields.markdoc | body | 본문 |
+
+**cover가 `image()`가 아니라 `string`인 이유(T1에서 실측)**: Keystatic의 `fields.image()`는 프런트매터에 `publicPath` 기반 공개 URL 문자열(예: `/posts-images/<slug>/cover.png`)을 쓰고, 실제 파일은 `directory`(고정 경로, 슬러그 하위 폴더 자동 생성)에 저장한다 — 엔트리 파일 기준 상대경로가 아니라서 Astro 콘텐츠 컬렉션의 `image()`(Vite로 처리되는 콜로케이션 상대경로를 기대)와 맞지 않는다. 그래서 이미지 디렉터리를 `public/posts-images`로 두고(공개 URL과 실제 위치가 일치), zod는 `z.string().optional()`로 그 URL 문자열을 그대로 받는다 — Vite 이미지 최적화(width/height 자동 추론)는 포기하지만 이 평가용 사이트엔 충분하다.
 
 ### authors — `src/content/authors/*`
 

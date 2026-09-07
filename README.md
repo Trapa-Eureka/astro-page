@@ -38,3 +38,4 @@ npm run build && npm run verify   # 정적 빌드 + dist 검증 스위트
 
 - 2026-09-06: 문서 단계 (코드 미작성). T0부터 시작.
 - 2026-09-07: **T0 완료** — Astro 7.3.1(TS strict) 스캐폴딩 + react/markdoc/keystatic 통합(SKIP_KEYSTATIC 조건부 마운트) + ESLint(flat config)/Prettier/Vitest(unit·verify 프로젝트) 배선. `npm run check`·`npm run build` 그린, dev에서 `/keystatic` 200 확인, dist에 keystatic·React 런타임 청크 없음 확인. 콘텐츠 모델(T1)은 다음 세션.
+- 2026-09-07: **T1 완료** — keystatic.config.ts(posts/authors 컬렉션 + settings 싱글턴, DESIGN §2 표) + src/content.config.ts(zod, cover/alt refine) + src/content.schemas.ts(테스트 가능한 zod 셰이프 분리, astro:content 가상 모듈 밖에서도 import 가능) + tests/content-parity.test.ts(필드 키 집합·필수 여부 패리티, 네거티브 케이스 포함). 시드: 포스트 7편(draft 1·다저자 1·커버 2/무커버 5·태그 10종 일부 중복), 저자 3인, settings. `npm run check`·`npm run build` 그린.

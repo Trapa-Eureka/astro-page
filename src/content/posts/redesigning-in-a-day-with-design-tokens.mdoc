@@ -1,0 +1,38 @@
+---
+title: Redesigning in a Day with Design Tokens
+excerpt: >-
+  How swapping a handful of CSS custom properties let us reskin the whole
+  site in an afternoon, and what we wish we'd tokenized sooner.
+pubDate: 2025-11-03
+authors:
+  - wren-okafor
+tags:
+  - design-systems
+  - css
+draft: false
+---
+When our client asked for a full visual refresh with a one-day turnaround, the honest answer should have been no. Instead we said yes, because six months earlier we'd quietly finished moving every color, spacing value, and font-size in the product to CSS custom properties.
+
+## What actually took a day
+
+Rewriting a design isn't the same as rewriting layout. We weren't moving boxes around — we were changing what color the boxes were, how much air sat between them, and which typeface carried the headlines. All three of those had already been reduced to a single source of truth:
+
+```css
+:root {
+  --color-ink: #121212;
+  --color-paper: #ffffff;
+  --color-accent: #2a3d8f;
+  --space-4: 16px;
+  --font-display: 'Source Serif 4', serif;
+}
+```
+
+Swap the values, ship the build, done. No component needed to know that its border color had changed, because no component ever hardcoded a border color.
+
+## What we hadn't tokenized
+
+Icon stroke widths. Shadow blur radii. The exact easing curve on hover transitions. None of these were load-bearing for the redesign we got asked for, but each one was a reminder that "design tokens" isn't a checkbox — it's an ongoing inventory of every visual decision you're willing to let someone change without touching a component file.
+
+## The actual lesson
+
+A token system doesn't save you time on the day of the redesign. It saves you the six months before it, spent being disciplined about a `--space-3` instead of a stray `14px` in a stylesheet. The redesign was fast because the discipline was already boring.
