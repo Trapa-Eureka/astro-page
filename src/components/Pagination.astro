@@ -1,0 +1,61 @@
+---
+import { pageHref } from '../lib/postFilters';
+
+interface Props {
+  currentPage: number;
+  lastPage: number;
+}
+
+const { currentPage, lastPage } = Astro.props;
+const prevHref = currentPage > 1 ? pageHref(currentPage - 1) : undefined;
+const nextHref = currentPage < lastPage ? pageHref(currentPage + 1) : undefined;
+---
+
+{
+  lastPage > 1 && (
+    <nav class="pagination" aria-label="Pagination">
+      {prevHref ? (
+        <a href={prevHref} rel="prev">
+          ← Newer
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="pagination__status">
+        Page {currentPage} of {lastPage}
+      </span>
+      {nextHref ? (
+        <a href={nextHref} rel="next">
+          Older →
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--step--1);
+  }
+
+  .pagination a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .pagination a:hover {
+    text-decoration: underline;
+  }
+
+  .pagination__status {
+    color: var(--color-muted);
+  }
+</style>
