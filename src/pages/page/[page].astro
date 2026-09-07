@@ -22,6 +22,7 @@ const { page } = Astro.props;
   description="Notes on building and maintaining web software, from the engineers at Makinilya Studio."
 >
   <div class="container">
+    <h1 class="visually-hidden">Makinilya Engineering — Page {page.currentPage}</h1>
     {page.data.map((post) => <PostCard post={post} />)}
     <Pagination currentPage={page.currentPage} lastPage={page.lastPage} />
   </div>

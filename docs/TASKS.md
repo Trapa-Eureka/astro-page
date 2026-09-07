@@ -39,7 +39,7 @@
 - 목표: rss.xml(@astrojs/rss)·sitemap 통합·페이지별 title/description/OG 슬롯 채움.
 - 완료 기준: [ ] RSS가 publishedPosts 경유 [ ] 메타 슬롯 누락 시 타입 에러(필수 prop) [ ] check 통과
 
-### T7 — 빌드 베리파이어 · 상태: TODO · 의존: T3~T6
+### T7 — 빌드 베리파이어 · 상태: DONE(2026-09-07) · 의존: T3~T6
 - 목표: `scripts/verify/` vitest 프로젝트 — TESTING §4 체크리스트 전 항목 구현, `npm run verify`.
 - 완료 기준: [ ] **§4 전 항목 그린** [ ] 의도적 훼손(링크 하나 깨기) 시 정확히 그 항목이 실패하는 네거티브 확인 [ ] check 통과
 
