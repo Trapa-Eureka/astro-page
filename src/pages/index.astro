@@ -18,6 +18,7 @@ const lastPage = totalPages(posts.length, PAGE_SIZE);
   description="Notes on building and maintaining web software, from the engineers at Makinilya Studio."
 >
   <div class="container">
+    <h1 class="visually-hidden">Makinilya Engineering — Latest posts</h1>
     {pageOnePosts.map((post) => <PostCard post={post} />)}
     <Pagination currentPage={1} lastPage={lastPage} />
   </div>
