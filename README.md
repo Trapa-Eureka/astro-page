@@ -1,0 +1,39 @@
+# astro-test
+
+**Astro + Keystatic 평가용 테스트 웹사이트** — 가상의 웹개발 회사 "Makinilya Studio"의 기술 블로그.
+
+- 레퍼런스: https://theguardian.engineering/ 의 **레이아웃 문법만** 차용한다 — 에디토리얼 블로그 패턴(강한 세리프 헤드라인, 최신순 기사 리스트 홈, 단일 칼럼 기사 페이지). **콘텐츠·로고·전용 서체·문구는 일절 복제하지 않는다** (SPEC §2의 금지 목록).
+- 콘텐츠는 전부 자작: 가상 회사 Makinilya Studio(마키닐야 = 타갈로그어 "타자기")의 픽션 저자 3인이 쓴 웹개발 기술 포스트 6~8편. 회사명·저자명은 언제든 교체 가능한 플레이스홀더.
+- 이 프로젝트의 진짜 목적: **Keystatic을 실서비스 CMS 후보로 평가**하는 것. 완료 시 "Keystatic 평가 메모"가 산출물에 포함된다 (T10).
+
+## 스택 요약
+
+Astro(최신 안정, TS strict) + Keystatic(local 모드, 관리자 UI는 개발 전용) + React·Markdoc 통합 + 자작 CSS 디자인 토큰 + 셀프호스팅 오픈 폰트. 프로덕션 빌드는 `SKIP_KEYSTATIC=true`로 관리자 라우트를 제외한 완전 정적 사이트다.
+
+## 문서 맵
+
+| 문서 | 내용 | 읽는 시점 |
+|---|---|---|
+| `CLAUDE.md` | 에이전트 스티어링 — 스택, 명령어, 규칙, 가드레일 | 모든 에이전트 세션 시작 시 (자동 로드) |
+| `docs/SPEC.md` | 제품 스펙 — 레퍼런스 차용 범위·금지 목록, 페이지 구성, 평가 목적 | 기능 논의·범위 판단 전 |
+| `docs/DESIGN.md` | 기술 설계 — 콘텐츠 모델(이중 스키마), 라우트, 빌드 베리파이어 | 구현 전 필독 |
+| `docs/TESTING.md` | 테스트 전략 — 스키마 패리티, dist 검사(브라우저 0) | 테스트 작성 전 |
+| `docs/TASKS.md` | 태스크 백로그 — 에이전트 실행 단위, 완료 기준 | 작업 배정 시 |
+| `docs/WORKFLOW.md` | AI-native 개발 규칙 (공통 + 이 레포 특이사항) | 최초 1회 + 운영 중 참조 |
+
+## 개발 방식
+
+앞선 다섯 레포와 동일: **문서 → 에이전트 구현 → 검증**. 사람(Jin)은 스펙·시각 리뷰·Keystatic 편집 스모크, 구현은 Claude Code가 `docs/TASKS.md` 단위로. 공통 게이트는 `npm run check`, 사이트 품질 게이트는 `npm run verify`(빌드 산출물 검사).
+
+## 퀵스타트 (T0 완료 후 유효)
+
+```bash
+npm install
+npm run check      # astro check + lint + test — 공통 게이트
+npm run dev        # 개발 서버 (+ /keystatic 관리자 UI)
+npm run build && npm run verify   # 정적 빌드 + dist 검증 스위트
+```
+
+## 상태
+
+- 2026-09-06: 문서 단계 (코드 미작성). T0부터 시작.
