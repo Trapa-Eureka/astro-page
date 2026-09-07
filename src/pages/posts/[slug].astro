@@ -1,0 +1,110 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, getEntries, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AuthorLine from '../../components/AuthorLine.astro';
+import { formatDate } from '../../lib/formatDate';
+import { readingTime } from '../../lib/readingTime';
+import { tagSlug } from '../../lib/tagSlug';
+import { publishedPosts } from '../../lib/postFilters';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts');
+  // Drafts are visible in dev (SPEC.md §3: "개발 서버에선 보임") but never get a route in
+  // the production build — publishedPosts()'s includeDrafts option exists for exactly this.
+  const posts = publishedPosts(allPosts, { includeDrafts: import.meta.env.DEV });
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const authors = await getEntries(post.data.authors);
+const minutes = readingTime(post.body ?? '');
+---
+
+<BaseLayout title={post.data.title} description={post.data.excerpt} ogType="article">
+  <article class="container post">
+    {post.data.cover && <img class="post__cover" src={post.data.cover} alt={post.data.coverAlt} />}
+    <h1 class="post__title">{post.data.title}</h1>
+    <p class="post__meta">
+      <AuthorLine authors={authors} /> ·{' '}
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time> ·{' '}
+      {minutes} min read
+    </p>
+    <div class="prose">
+      <Content />
+    </div>
+    {
+      post.data.tags.length > 0 && (
+        <ul class="post__tags">
+          {post.data.tags.map((tag) => (
+            <li>
+              <a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    padding-block: var(--space-7);
+  }
+
+  .post__cover {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: var(--space-6);
+  }
+
+  .post__title {
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    line-height: var(--line-height-tight);
+    margin: 0;
+    max-width: var(--measure);
+  }
+
+  .post__meta {
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    font-size: var(--step--1);
+  }
+
+  .post > .prose {
+    margin-top: var(--space-7);
+  }
+
+  .post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: var(--space-7) 0 0;
+    padding: 0;
+    max-width: var(--measure);
+  }
+
+  .post__tags a {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: var(--step--1);
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+
+  .post__tags a:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>
