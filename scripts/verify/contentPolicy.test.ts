@@ -6,7 +6,18 @@ import { listAllDistFiles, ROOT_DIR } from './helpers';
 // TESTING.md §4 "콘텐츠 정책": no trace of the layout reference anywhere in dist or in
 // authored content (CLAUDE.md guardrail 1). Grep-shaped, case-insensitive.
 
-const FORBIDDEN_STRINGS = ['theguardian', 'guardian egyptian', 'guardian headline'];
+// T8 broadens this beyond T7's original three — same guardrail (CLAUDE.md #1), more
+// spellings/variants of the reference site's name and its exclusive typefaces.
+// Deliberately scoped to strings that identify the reference site specifically (its
+// domain and its exclusive typeface names) — not the common word "guardian" on its own,
+// which would false-positive on unrelated prose.
+const FORBIDDEN_STRINGS = [
+  'theguardian',
+  'guardian.co.uk',
+  'guardian egyptian',
+  'guardian headline',
+  'guardian sans',
+];
 const TEXT_EXTENSIONS = new Set([
   '.html',
   '.xml',
@@ -17,6 +28,8 @@ const TEXT_EXTENSIONS = new Set([
   '.md',
   '.ts',
   '.astro',
+  '.mjs', // astro.config.mjs, markdoc.config.mjs
+  '.json',
 ]);
 
 function listFilesRecursively(dir: string): string[] {
