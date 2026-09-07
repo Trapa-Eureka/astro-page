@@ -37,3 +37,4 @@ npm run build && npm run verify   # 정적 빌드 + dist 검증 스위트
 ## 상태
 
 - 2026-09-06: 문서 단계 (코드 미작성). T0부터 시작.
+- 2026-09-07: **T0 완료** — Astro 7.3.1(TS strict) 스캐폴딩 + react/markdoc/keystatic 통합(SKIP_KEYSTATIC 조건부 마운트) + ESLint(flat config)/Prettier/Vitest(unit·verify 프로젝트) 배선. `npm run check`·`npm run build` 그린, dev에서 `/keystatic` 200 확인, dist에 keystatic·React 런타임 청크 없음 확인. 콘텐츠 모델(T1)은 다음 세션.
