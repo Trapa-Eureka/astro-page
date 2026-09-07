@@ -1,6 +1,7 @@
-import { statSync } from 'node:fs';
+import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { listAllDistFiles, listHtmlFiles, loadHtml, urlPathFor } from './helpers';
+import { listAllDistFiles, listHtmlFiles, loadHtml, ROOT_DIR, urlPathFor } from './helpers';
 
 // TESTING.md §4 "정책·접근성 기본"
 
@@ -62,15 +63,49 @@ describe('zero external-origin references', () => {
   });
 });
 
+// T8 hardens this beyond T7's path-only check. Note what it deliberately does NOT do: a
+// blind case-insensitive text scan for "keystatic" across dist. That was tried first and
+// false-positived on this site's own content — the seed post "Shipping a CMS Without
+// Losing Your Static Site" legitimately discusses Keystatic by name, so do its home-page
+// excerpt, its rss.xml entry, and its tag pages. Mentioning a product's name in prose is
+// not evidence its admin UI shipped. The real, false-positive-free signal is: no href/src
+// anywhere points at the /keystatic/ route, and no runtime exists that could render an
+// admin UI even if a route did — zero <script> tags, not just zero .js files (an inline
+// <script> would slip past a "no .js files" check entirely).
 describe('SKIP_KEYSTATIC wiring: no admin routes, no React runtime', () => {
   it('no file path under dist contains "keystatic"', () => {
     const offenders = listAllDistFiles().filter((f) => f.toLowerCase().includes('keystatic'));
     expect(offenders).toEqual([]);
   });
 
+  it('no href/src in dist HTML points at the /keystatic/ admin route', () => {
+    const offenders: string[] = [];
+    for (const file of listHtmlFiles()) {
+      const $ = loadHtml(file);
+      $('[href], [src]').each((_, el) => {
+        for (const attr of ['href', 'src']) {
+          const value = $(el).attr(attr);
+          if (value?.includes('/keystatic')) {
+            offenders.push(`${urlPathFor(file)}: ${attr}="${value}"`);
+          }
+        }
+      });
+    }
+    expect(offenders, offenders.join('\n')).toEqual([]);
+  });
+
   it('dist ships zero JavaScript files (fully static — no React/admin runtime chunk)', () => {
     const jsFiles = listAllDistFiles().filter((f) => f.endsWith('.js'));
     expect(jsFiles, jsFiles.join('\n')).toEqual([]);
+  });
+
+  it('dist HTML has zero <script> tags (not just zero .js files — an inline script would evade that check)', () => {
+    const offenders: string[] = [];
+    for (const file of listHtmlFiles()) {
+      const $ = loadHtml(file);
+      if ($('script').length > 0) offenders.push(urlPathFor(file));
+    }
+    expect(offenders, offenders.join('\n')).toEqual([]);
   });
 });
 
@@ -84,5 +119,31 @@ describe('page size budget', () => {
       }
     }
     expect(overBudget, overBudget.join('\n')).toEqual([]);
+  });
+
+  // T8: a standing report, not just a pass/fail — docs/TASKS.md's "용량 예산 리포트".
+  // Regenerated on every `npm run verify`; gitignored like dist/ itself.
+  it('writes a page-size-vs-budget report', () => {
+    const rows = listHtmlFiles()
+      .map((file) => ({
+        path: urlPathFor(file),
+        bytes: statSync(file).size,
+        percentOfBudget: Math.round((statSync(file).size / PAGE_SIZE_BUDGET_BYTES) * 1000) / 10,
+      }))
+      .sort((a, b) => b.bytes - a.bytes);
+
+    const report = {
+      generatedAt: new Date().toISOString(),
+      budgetBytes: PAGE_SIZE_BUDGET_BYTES,
+      pages: rows,
+      largest: rows[0] ?? null,
+      totalBytes: rows.reduce((sum, row) => sum + row.bytes, 0),
+    };
+
+    const reportDir = join(ROOT_DIR, 'scripts', 'verify', 'reports');
+    mkdirSync(reportDir, { recursive: true });
+    writeFileSync(join(reportDir, 'page-sizes.json'), JSON.stringify(report, null, 2));
+
+    expect(rows.length).toBeGreaterThan(0);
   });
 });

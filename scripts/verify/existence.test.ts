@@ -1,7 +1,14 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { DIST_DIR, listHtmlFiles, loadHtml, resolveInternalHref, urlPathFor } from './helpers';
+import {
+  DIST_DIR,
+  draftPostSlugs,
+  listHtmlFiles,
+  loadHtml,
+  resolveInternalHref,
+  urlPathFor,
+} from './helpers';
 
 // TESTING.md §4 "존재·무결성"
 
@@ -85,6 +92,33 @@ describe('404 page', () => {
       .get();
     expect(hrefs).toContain('/');
     expect(hrefs.some((href) => href?.startsWith('/posts/'))).toBe(true);
+  });
+});
+
+describe('draft exclusion (T8: re-verified across every path, not just RSS/sitemap)', () => {
+  it('no draft post has a route anywhere in dist', () => {
+    const leaks: string[] = [];
+    for (const slug of draftPostSlugs()) {
+      const routeDir = join(DIST_DIR, 'posts', slug);
+      if (existsSync(routeDir)) leaks.push(`dist/posts/${slug}/ exists`);
+    }
+    expect(leaks, leaks.join('\n')).toEqual([]);
+  });
+
+  it('no draft post is linked from anywhere in dist (home, tags, 404, or any other page)', () => {
+    const leaks: string[] = [];
+    const draftHrefFragments = draftPostSlugs().map((slug) => `/posts/${slug}/`);
+    if (draftHrefFragments.length === 0) return; // nothing to check — no drafts in the seed
+    for (const file of listHtmlFiles()) {
+      const $ = loadHtml(file);
+      $('a[href]').each((_, el) => {
+        const href = $(el).attr('href') ?? '';
+        if (draftHrefFragments.some((fragment) => href.includes(fragment))) {
+          leaks.push(`${urlPathFor(file)} links to draft href "${href}"`);
+        }
+      });
+    }
+    expect(leaks, leaks.join('\n')).toEqual([]);
   });
 });
 
