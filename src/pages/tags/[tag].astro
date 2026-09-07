@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { publishedPosts } from '../../lib/postFilters';
+import { groupPostsByTagSlug } from '../../lib/tagGroups';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts');
+  const posts = publishedPosts(allPosts);
+  const groups = groupPostsByTagSlug(posts);
+  return Array.from(groups.values()).map((group) => ({
+    params: { tag: group.slug },
+    props: { label: group.label, posts: group.posts },
+  }));
+}
+
+interface Props {
+  label: string;
+  posts: Awaited<ReturnType<typeof getCollection<'posts'>>>;
+}
+
+const { label, posts } = Astro.props;
+---
+
+<BaseLayout
+  title={`Posts tagged “${label}” — Makinilya Engineering`}
+  description={`All posts tagged "${label}" on Makinilya Engineering.`}
+>
+  <div class="container">
+    <h1 class="tag-heading">Tagged “{label}”</h1>
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .tag-heading {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    margin: var(--space-7) 0 var(--space-6);
+  }
+</style>

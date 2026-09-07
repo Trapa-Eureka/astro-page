@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const authors = await getCollection('authors');
+---
+
+<BaseLayout
+  title="About — Makinilya Engineering"
+  description="Makinilya Studio is a fictional web development studio. This is the engineering blog behind that fiction."
+>
+  <div class="container about">
+    <h1>About Makinilya Studio</h1>
+    <p class="about__disclaimer">
+      Makinilya Studio, its people, and its projects are entirely fictional — this site is a demo
+      built to evaluate a publishing stack, not a real company.
+    </p>
+    <p>
+      Makinilya ("typewriter" in Tagalog) is a small, imaginary web development studio. This blog
+      collects the notes its engineers would write if they existed: how the studio's own static site
+      is built, what its build verification suite catches, and the design and content decisions
+      behind a small editorial template.
+    </p>
+
+    <h2>Who writes here</h2>
+    <ul class="about__authors">
+      {
+        authors.map((author) => (
+          <li class="about__author">
+            <h3>{author.data.name}</h3>
+            <p class="about__author-role">{author.data.role}</p>
+            <p>{author.data.bio}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .about {
+    padding-block: var(--space-7);
+    max-width: var(--measure);
+  }
+
+  .about h1 {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    margin: 0 0 var(--space-5);
+  }
+
+  .about__disclaimer {
+    color: var(--color-muted);
+    font-style: italic;
+  }
+
+  .about h2 {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    margin-top: var(--space-8);
+  }
+
+  .about__authors {
+    list-style: none;
+    margin: var(--space-5) 0 0;
+    padding: 0;
+  }
+
+  .about__author + .about__author {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .about__author h3 {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .about__author-role {
+    margin: var(--space-1) 0 var(--space-2);
+    color: var(--color-muted);
+    font-size: var(--step--1);
+  }
+</style>
