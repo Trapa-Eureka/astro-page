@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  authors: CollectionEntry<'authors'>[];
+}
+
+const { authors } = Astro.props;
+
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? '';
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
+}
+
+const names = authors.map((author) => author.data.name);
+---
+
+<span class="author-line">By {joinNames(names)}</span>

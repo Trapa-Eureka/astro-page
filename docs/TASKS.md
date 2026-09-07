@@ -23,7 +23,7 @@
 - 목표: tokens.css(§4)·base.css·prose.css, 오픈 폰트 woff2 셀프호스팅(public/fonts), BaseLayout(랜드마크·스킵 링크·메타 슬롯), Header/Footer(settings 싱글턴 사용).
 - 완료 기준: [ ] 외부 origin 참조 0 [ ] 랜드마크·스킵 링크 존재(단위 렌더 테스트 또는 dev 확인 스크립트) [ ] check 통과
 
-### T3 (레인 A) — 홈 리스트 + 페이지네이션 · 상태: TODO · 의존: T2
+### T3 (레인 A) — 홈 리스트 + 페이지네이션 · 상태: DONE(2026-09-07) · 의존: T2
 - 목표: `/` 최신순 리스트(PostCard: 제목·저자·날짜·발췌), `paginate()` 10개, `/page/N`.
 - 완료 기준: [ ] publishedPosts 경유(직접 정렬 금지) [ ] 페이지 수 산식 단위 테스트 [ ] check 통과
 

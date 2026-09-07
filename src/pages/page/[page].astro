@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import { publishedPosts } from '../../lib/postFilters';
+
+export async function getStaticPaths({ paginate }: { paginate: import('astro').PaginateFunction }) {
+  const allPosts = await getCollection('posts');
+  const posts = publishedPosts(allPosts);
+  // Page 1 lives at "/" (src/pages/index.astro), so this route only covers page >= 2 —
+  // see src/lib/postFilters.ts's pageHref for the same boundary encoded for links.
+  // Page size (10) matches index.astro's PAGE_SIZE and DESIGN.md §3.
+  return paginate(posts, { pageSize: 10 }).slice(1);
+}
+
+const { page } = Astro.props;
+---
+
+<BaseLayout
+  title={`Makinilya Engineering — Page ${page.currentPage}`}
+  description="Notes on building and maintaining web software, from the engineers at Makinilya Studio."
+>
+  <div class="container">
+    {page.data.map((post) => <PostCard post={post} />)}
+    <Pagination currentPage={page.currentPage} lastPage={page.lastPage} />
+  </div>
+</BaseLayout>

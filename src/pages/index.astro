@@ -1,10 +1,24 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import Pagination from '../components/Pagination.astro';
+import { publishedPosts, totalPages } from '../lib/postFilters';
+
+const PAGE_SIZE = 10;
+
+const allPosts = await getCollection('posts');
+const posts = publishedPosts(allPosts);
+const pageOnePosts = posts.slice(0, PAGE_SIZE);
+const lastPage = totalPages(posts.length, PAGE_SIZE);
 ---
 
 <BaseLayout
   title="Makinilya Engineering"
   description="Notes on building and maintaining web software, from the engineers at Makinilya Studio."
 >
-  <p class="container">Home page content lands in T3.</p>
+  <div class="container">
+    {pageOnePosts.map((post) => <PostCard post={post} />)}
+    <Pagination currentPage={1} lastPage={lastPage} />
+  </div>
 </BaseLayout>
