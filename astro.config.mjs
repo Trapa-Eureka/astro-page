@@ -12,5 +12,8 @@ import keystatic from '@keystatic/astro';
 // still emits an unreferenced ~190KB client bundle into dist/_astro even with zero
 // islands in use). markdoc() stays unconditional — it renders the actual post content.
 export default defineConfig({
+  // Placeholder — swap for the real deployed origin at T10 (Vercel). Needed for absolute
+  // canonical/OG URLs and RSS/sitemap (T6); company name is a placeholder throughout anyway.
+  site: 'https://makinilya-engineering.example',
   integrations: [markdoc(), ...(process.env.SKIP_KEYSTATIC ? [] : [react(), keystatic()])],
 });
