@@ -1,0 +1,10 @@
+dist/
+.astro/
+node_modules/
+public/fonts/
+
+# Hand-authored spec/steering docs — content is the source of truth, not code.
+# Prettier stays scoped to source + config files.
+docs/
+README.md
+CLAUDE.md

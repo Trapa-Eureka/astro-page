@@ -12,7 +12,7 @@
 [검증]  npm run verify ──► dist를 cheerio로 검사 (TESTING §4)
 ```
 
-- 통합: `integrations: [react(), markdoc(), ...(process.env.SKIP_KEYSTATIC ? [] : [keystatic()])]` — Keystatic 공식 "프로덕션에서 관리자 UI 비활성화" 레시피. 개발 서버에선 관리자·API 라우트가 살아 있고, 프로덕션 빌드는 어댑터 없이 정적으로 떨어진다.
+- 통합: `integrations: [markdoc(), ...(process.env.SKIP_KEYSTATIC ? [] : [react(), keystatic()])]`. React는 Keystatic 관리자 UI 전용이라 keystatic()과 함께 조건부 마운트한다 — react()를 프로덕션에 무조건 포함시키면(당초 안) 페이지에서 실제로 쓰지 않아도 `@astrojs/react`가 참조되지 않는 React 런타임 청크(~190KB)를 dist에 남기는 것을 T0에서 확인했다(빈 청크라 HTML에서 로드되진 않지만 verify의 "React 런타임 청크 부재" 항목과 상충). markdoc()만 무조건 포함(본문 렌더링에 필요). 개발 서버에선 관리자·API 라우트가 살아 있고, 프로덕션 빌드는 어댑터 없이 정적으로 떨어진다.
 - 같은 파일을 Keystatic이 쓰고 Astro가 읽는다 — 두 스키마의 동기화는 패리티 테스트(§2 하단)가 강제한다.
 
 ## 2. 콘텐츠 모델 (이중 스키마의 단일 진실)
@@ -75,7 +75,7 @@ siteTitle · description · footerNote. 회사명 교체는 여기 1곳.
 SKIP_KEYSTATIC=            # build 스크립트가 true로 설정. dev에선 비움
 ```
 
-package.json scripts: `check`(astro check+lint+format:check+vitest), `build`(SKIP_KEYSTATIC=true astro build), `verify`(vitest --project verify — dist 필요), `dev`, `preview`.
+package.json scripts: `check`(astro check+lint+format:check+vitest --project unit), `build`(SKIP_KEYSTATIC=true astro build), `verify`(vitest run --project verify — dist 필요), `dev`(astro dev, SKIP_KEYSTATIC 비움), `preview`(**SKIP_KEYSTATIC=true astro preview** — keystatic()이 켜져 있으면 Keystatic의 API 라우트 때문에 `output`이 static이 아닌 server로 강제되고, 어댑터가 없어 preview가 "No adapter found"로 실패한다; preview는 어차피 `build`가 만든 정적 dist를 보는 용도라 build와 동일하게 SKIP_KEYSTATIC을 켠다).
 
 ## 7. 디렉터리 구조 (목표)
 

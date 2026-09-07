@@ -11,7 +11,7 @@
 
 ---
 
-### T0 — 스캐폴딩 + 통합 배선 · 상태: TODO
+### T0 — 스캐폴딩 + 통합 배선 · 상태: DONE(2026-09-07)
 - 목표: Astro 최신 안정으로 프로젝트 생성(버전을 README 상태 절에 기록), TS strict, react·markdoc·keystatic 통합 + `SKIP_KEYSTATIC` 조건 마운트, ESLint/Prettier/Vitest, 스크립트 일체(check/dev/build/verify/preview), `.env.example`, `.gitignore`.
 - 완료 기준: [ ] `npm run check` 통과 [ ] dev에서 `/keystatic` 응답 [ ] `npm run build` 성공 + dist에 keystatic 경로 부재(임시 수동 확인) [ ] git init + 첫 커밋
 
