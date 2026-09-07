@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { publishedPosts } from '../lib/postFilters';
+
+const allPosts = await getCollection('posts');
+const [latest] = publishedPosts(allPosts);
+---
+
+<BaseLayout title="Page not found — Makinilya Engineering" description="This page doesn't exist.">
+  <div class="container not-found">
+    <h1>Page not found</h1>
+    <p>The page you're looking for doesn't exist, or moved.</p>
+    <ul>
+      <li><a href="/">Back to the home page</a></li>
+      {
+        latest && (
+          <li>
+            <a href={`/posts/${latest.id}/`}>Read the latest post: {latest.data.title}</a>
+          </li>
+        )
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    padding-block: var(--space-8);
+    max-width: var(--measure);
+  }
+
+  .not-found h1 {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    margin: 0 0 var(--space-4);
+  }
+
+  .not-found ul {
+    margin-top: var(--space-5);
+    padding-left: var(--space-6);
+  }
+
+  .not-found a {
+    color: var(--color-accent);
+  }
+</style>
