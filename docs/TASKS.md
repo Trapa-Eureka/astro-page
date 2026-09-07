@@ -35,7 +35,7 @@
 - 목표: `/tags/[tag]`(tagSlug 정규화 공용), `/about`(픽션 회사·저자 3인), `/404`.
 - 완료 기준: [ ] 태그 라우트와 링크가 같은 함수 사용(불일치 테스트) [ ] check 통과
 
-### T6 (레인 D) — RSS·sitemap·SEO · 상태: TODO · 의존: T2
+### T6 (레인 D) — RSS·sitemap·SEO · 상태: DONE(2026-09-07) · 의존: T2
 - 목표: rss.xml(@astrojs/rss)·sitemap 통합·페이지별 title/description/OG 슬롯 채움.
 - 완료 기준: [ ] RSS가 publishedPosts 경유 [ ] 메타 슬롯 누락 시 타입 에러(필수 prop) [ ] check 통과
 

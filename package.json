@@ -21,6 +21,8 @@
   "dependencies": {
     "@astrojs/markdoc": "^2.0.9",
     "@astrojs/react": "^6.0.5",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
     "astro": "^7.3.1",
