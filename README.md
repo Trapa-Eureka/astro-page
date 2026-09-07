@@ -25,14 +25,22 @@ Astro(최신 안정, TS strict) + Keystatic(local 모드, 관리자 UI는 개발
 
 앞선 다섯 레포와 동일: **문서 → 에이전트 구현 → 검증**. 사람(Jin)은 스펙·시각 리뷰·Keystatic 편집 스모크, 구현은 Claude Code가 `docs/TASKS.md` 단위로. 공통 게이트는 `npm run check`, 사이트 품질 게이트는 `npm run verify`(빌드 산출물 검사).
 
-## 퀵스타트 (T0 완료 후 유효)
+## 퀵스타트
 
 ```bash
 npm install
-npm run check      # astro check + lint + test — 공통 게이트
-npm run dev        # 개발 서버 (+ /keystatic 관리자 UI)
-npm run build && npm run verify   # 정적 빌드 + dist 검증 스위트
+npm run check      # astro check + lint + format:check + vitest(unit) — 공통 게이트
+npm run dev        # 개발 서버: http://localhost:4321 (+ /keystatic 관리자 UI)
+npm run build       # SKIP_KEYSTATIC=true 정적 빌드 → dist/
+npm run verify      # 빌드 산출물 검사 스위트 (빌드 후 실행, cheerio+fs만)
+npm run preview     # dist/ 로컬 미리보기: http://localhost:4321
 ```
+
+`package.json`에 새 의존성이 추가된 커밋을 받은 뒤에는(`git pull` 직후) `npm install`을 먼저
+해야 `npm run dev`/`verify`가 정상 동작한다 — `node_modules`는 git에 커밋되지 않는다.
+
+**라우트**: `/`(홈, 페이지네이션 `/page/2`~) · `/posts/[slug]` · `/tags/[tag]` · `/about` ·
+`/404` · `/rss.xml` · `/sitemap-index.xml` · `/keystatic`(개발 전용).
 
 ## 상태
 
@@ -46,3 +54,4 @@ npm run build && npm run verify   # 정적 빌드 + dist 검증 스위트
 - 2026-09-07: **T6 완료**(레인 D, 병렬 레인 전부 완료) — `@astrojs/rss`·`@astrojs/sitemap` 설치, `/rss.xml`(publishedPosts 경유, 발행 6편) + sitemap(`site` 설정 필요 — T2에서 이미 넣어둔 placeholder 도메인 재사용, 18 URL·draft·404·keystatic 자동 제외 확인). BaseLayout의 title/description이 필수 prop이라 누락 시 실제로 astro check 타입 에러 나는 것 확인. `npm run check`(53/53)·`npm run build` 그린. T3~T6 전부 완료 — 다음은 T7(빌드 베리파이어).
 - 2026-09-07: **T7 완료** — `scripts/verify/`(vitest verify 프로젝트, cheerio+fs만, 75개 검사) — TESTING.md §4 체크리스트 전 항목: 포스트 페이지·h1 유일성, 내부 링크+앵커 무결성, 404 링크, 페이지네이션 산식, 전 페이지 title/description/OG, rss.xml 파싱·항목 수·draft 부재, sitemap URL 수·draft·keystatic 부재, img alt 100%, 랜드마크·스킵 링크, 외부 origin 참조 0, keystatic·JS런타임 부재, 페이지 용량 100KB, 금지 문자열 스캔. **실제 버그 발견**: 홈(`/`)·`/page/N`에 h1이 아예 없었음 — visually-hidden h1 추가해서 고침. 네거티브 확인: dist의 링크 하나를 실제로 깨서 정확히 그 검사만 실패하는 것 확인 후 원복. `npm run check`(53/53)·`npm run verify`(75/75) 그린.
 - 2026-09-07: **T8 완료** — draft 제외를 dist 전 경로(라우트 부재 + 어디서도 링크 안 됨)로 재확인, `/keystatic` href 스캔 정밀화(경로·JS파일·script태그 3중 확인 — 처음엔 콘텐츠 텍스트 전수 스캔으로 시도했다가 "Shipping a CMS..." 포스트 본문이 정당하게 "Keystatic"을 언급해서 오탐 발생 → href 기반 검사로 교체), 금지 문자열 목록·확장자 확대(.mjs/.json 포함), 페이지 용량 리포트(`scripts/verify/reports/page-sizes.json`, gitignore 대상) 추가. 네거티브 확인(draft 링크 실제로 심어봄) 통과. `npm run check`(53/53)·`npm run verify`(80/80) 그린.
+- 2026-09-08: **T9 완료** — 시드 콘텐츠(발췌·태그) 재검토: 발췌 전부 200자 제한 내(122~148자), 태그 10종 중복 없이 정리돼 있음을 확인, 수정 불필요. 실제 브라우저로 홈/포스트(커버 유무 모두)/태그/about/404/`/keystatic`(dev)를 열어 콘솔 확인 — warning·error 0(React DevTools 안내 같은 정상 INFO 로그만). README 퀵스타트를 실제 명령어·라우트 목록으로 갱신. `npm run check`(53/53)·`npm run verify`(80/80) 그린, `npm run preview` 기동 확인(홈·포스트·rss.xml 200). T0~T9 전부 완료 — 다음은 T10(사람 스모크 + 평가 메모).
