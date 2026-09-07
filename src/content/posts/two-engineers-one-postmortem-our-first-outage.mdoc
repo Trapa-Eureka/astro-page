@@ -1,0 +1,31 @@
+---
+title: 'Two Engineers, One Postmortem: Our First Outage'
+excerpt: >-
+  Our static site went down for eleven minutes because of a DNS change
+  neither of us made. Two perspectives on the same incident.
+pubDate: 2026-01-28
+authors:
+  - dax-oduya
+  - priya-castellanos
+tags:
+  - reliability
+  - postmortem
+draft: false
+---
+Eleven minutes of downtime on a static site sounds almost impressive to cause by accident. This is what it looked like from the front end and from the platform side, written up together because we disagreed about the root cause until we compared notes.
+
+## Dax: what I saw
+
+The build was green. The deploy log said success. And the site was serving a 522 to anyone who loaded it. My first instinct was that we'd shipped something broken — I spent the first four minutes reading a diff that turned out to have nothing to do with it.
+
+## Priya: what I saw
+
+A DNS record had been changed as part of an unrelated infrastructure cleanup, and the change hadn't propagated evenly yet. From the platform side, this looked like a routing problem, not an application problem — the origin was healthy the entire time, which is not information the front end had any way to see.
+
+## Where we actually lost time
+
+Not in fixing it — reverting the DNS change took under a minute once we knew what it was. We lost time because the first four minutes were spent independently ruling out the wrong layer of the stack, in parallel, without comparing notes.
+
+## What changed afterward
+
+One incident channel, one shared timeline, first message posted before either of us had a diagnosis. It feels slower in the moment. It is not slower than two people quietly debugging the wrong problem at the same time.

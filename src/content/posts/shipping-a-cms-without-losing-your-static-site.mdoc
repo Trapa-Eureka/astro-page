@@ -1,0 +1,37 @@
+---
+title: Shipping a CMS Without Losing Your Static Site
+excerpt: >-
+  What we learned bolting Keystatic onto an otherwise fully static Astro
+  build — and why the admin bundle never made it to production.
+pubDate: 2026-01-15
+authors:
+  - dax-oduya
+tags:
+  - cms
+  - astro
+cover: /posts-images/shipping-a-cms-without-losing-your-static-site/cover.png
+coverAlt: A deep-indigo gradient panel, the site's accent color at full saturation.
+draft: false
+---
+We moved our editorial workflow onto Keystatic without shipping a single byte of admin JavaScript to readers. Here is what made that possible, and where it got uncomfortable.
+
+## The constraint we set ourselves
+
+The brief was simple to state and harder to hold onto under deadline pressure: writers get a real editing UI, readers get a plain static site, and neither one is allowed to compromise the other. No React runtime in the production bundle. No admin routes reachable outside local development. The moment we treated that as a nice-to-have instead of a hard requirement, it was going to slip.
+
+## What actually made it work
+
+Keystatic's local storage mode writes directly to files in the repository — the same Markdoc and YAML files our static build already reads. There's no database, no API server, no second source of truth to keep in sync. An integration flag conditionally mounts the admin UI:
+
+```js
+integrations: [
+  markdoc(),
+  ...(process.env.SKIP_KEYSTATIC ? [] : [react(), keystatic()]),
+],
+```
+
+Set that flag for the production build, and the entire admin surface — React runtime included — never enters the bundle. We verified this the hard way: even with `react()` present but genuinely unused on every page, the build still emitted an orphaned client chunk. Gating React alongside Keystatic itself, not just the admin routes, was the fix.
+
+## The uncomfortable part
+
+Two schemas now describe the same content: one for Keystatic's editing form, one for the zod validation our pages read against. They will drift if nothing stops them. We wrote a parity test that fails the moment a field exists on only one side — the boring kind of test that never gets a demo, and that we'd have wanted six months ago.

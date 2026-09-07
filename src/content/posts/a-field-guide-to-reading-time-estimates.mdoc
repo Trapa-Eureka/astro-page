@@ -1,0 +1,33 @@
+---
+title: A Field Guide to Reading Time Estimates
+excerpt: >-
+  "4 min read" is a word count divided by a guess. Here's how we picked our
+  guess, and why we stopped worrying about making it more accurate.
+pubDate: 2026-03-05
+authors:
+  - wren-okafor
+tags:
+  - astro
+  - performance
+cover: /posts-images/a-field-guide-to-reading-time-estimates/cover.png
+coverAlt: An abstract clock face rendered as overlapping orange rectangles.
+draft: false
+---
+Reading time badges look precise — "6 min read" — but they're built on a number nobody measured: how fast you, specifically, read. We use 230 words per minute, which is a commonly cited average, applied to a word count nobody agreed on either.
+
+## The function is intentionally dumb
+
+```ts
+export function readingTime(source: string, wordsPerMinute = 230): number {
+  const words = source.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / wordsPerMinute));
+}
+```
+
+No adjustment for code blocks, images, or how dense the prose is. A post that's mostly a code sample gets the same per-word rate as one that's mostly narrative, even though nobody reads a code block at reading speed.
+
+## Why we didn't make it smarter
+
+We looked at weighting code blocks differently, and reading-level scoring, and gave up on both. The badge isn't a promise — it's a signal that lets a reader decide whether now is a good time to start. A number that's roughly right and always available beats one that's occasionally more accurate and requires guessing at someone's actual reading speed, which no formula can do anyway.
+
+The floor of one minute matters more than any of that: a 40-word post rounding to "0 min read" looks like a bug, not an insight.

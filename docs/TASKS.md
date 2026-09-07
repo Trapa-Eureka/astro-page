@@ -15,7 +15,7 @@
 - 목표: Astro 최신 안정으로 프로젝트 생성(버전을 README 상태 절에 기록), TS strict, react·markdoc·keystatic 통합 + `SKIP_KEYSTATIC` 조건 마운트, ESLint/Prettier/Vitest, 스크립트 일체(check/dev/build/verify/preview), `.env.example`, `.gitignore`.
 - 완료 기준: [ ] `npm run check` 통과 [ ] dev에서 `/keystatic` 응답 [ ] `npm run build` 성공 + dist에 keystatic 경로 부재(임시 수동 확인) [ ] git init + 첫 커밋
 
-### T1 — 콘텐츠 모델 + 시드 · 상태: TODO · 의존: T0
+### T1 — 콘텐츠 모델 + 시드 · 상태: DONE(2026-09-07) · 의존: T0
 - 목표: keystatic.config.ts(3컬렉션, DESIGN §2 표 그대로) + content.config.ts(zod, cover/alt refine) + **패리티 테스트** + 시드 콘텐츠(자작 픽션: 포스트 7편 — draft 1·다저자 1·커버 유무 혼합, 저자 3인, settings).
 - 완료 기준: [ ] 패리티 테스트 통과(필드 하나 빼면 실패함을 확인하는 네거티브 케이스 포함) [ ] cover/alt refine 테스트 [ ] 콘텐츠에 레퍼런스 흔적 0(자작 확인) [ ] check 통과
 
