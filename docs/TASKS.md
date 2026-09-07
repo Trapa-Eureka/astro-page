@@ -19,7 +19,7 @@
 - 목표: keystatic.config.ts(3컬렉션, DESIGN §2 표 그대로) + content.config.ts(zod, cover/alt refine) + **패리티 테스트** + 시드 콘텐츠(자작 픽션: 포스트 7편 — draft 1·다저자 1·커버 유무 혼합, 저자 3인, settings).
 - 완료 기준: [ ] 패리티 테스트 통과(필드 하나 빼면 실패함을 확인하는 네거티브 케이스 포함) [ ] cover/alt refine 테스트 [ ] 콘텐츠에 레퍼런스 흔적 0(자작 확인) [ ] check 통과
 
-### T2 — 디자인 토큰 + 베이스 레이아웃 · 상태: TODO · 의존: T1
+### T2 — 디자인 토큰 + 베이스 레이아웃 · 상태: DONE(2026-09-07) · 의존: T1
 - 목표: tokens.css(§4)·base.css·prose.css, 오픈 폰트 woff2 셀프호스팅(public/fonts), BaseLayout(랜드마크·스킵 링크·메타 슬롯), Header/Footer(settings 싱글턴 사용).
 - 완료 기준: [ ] 외부 origin 참조 0 [ ] 랜드마크·스킵 링크 존재(단위 렌더 테스트 또는 dev 확인 스크립트) [ ] check 통과
 
