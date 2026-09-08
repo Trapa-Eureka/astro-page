@@ -2,7 +2,7 @@
   Design tokens — docs/DESIGN.md §4.
   Self-hosted open fonts only (no CDN): see the @font-face rules below and
   public/fonts/. Values here are implementation defaults; visual tuning
-  (docs/WORKFLOW.md §2 "시각 판단은 사람 전용") happens by editing values in
+  (docs/WORKFLOW.md §2 "visual judgment is for humans only") happens by editing values in
   this file, not by adding libraries or restructuring markup.
 */
 

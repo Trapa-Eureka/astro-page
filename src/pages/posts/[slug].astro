@@ -10,7 +10,7 @@ import { publishedPosts } from '../../lib/postFilters';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('posts');
-  // Drafts are visible in dev (SPEC.md §3: "개발 서버에선 보임") but never get a route in
+  // Drafts are visible in dev (SPEC.md §3: "visible on the dev server") but never get a route in
   // the production build — publishedPosts()'s includeDrafts option exists for exactly this.
   const posts = publishedPosts(allPosts, { includeDrafts: import.meta.env.DEV });
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));

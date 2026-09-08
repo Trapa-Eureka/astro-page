@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { listHtmlFiles, loadHtml, ROOT_DIR, urlPathFor } from './helpers';
 
-// TESTING.md §4 "정책·접근성 기본"
+// TESTING.md §4 "Policy & accessibility basics"
 
 const PAGE_SIZE_BUDGET_BYTES = 100 * 1024;
 // astro.config.mjs's site — the only "external" origin dist is allowed to reference (its
@@ -130,7 +130,7 @@ describe('page size budget', () => {
     expect(overBudget, overBudget.join('\n')).toEqual([]);
   });
 
-  // T8: a standing report, not just a pass/fail — docs/TASKS.md's "용량 예산 리포트".
+  // T8: a standing report, not just a pass/fail — docs/TASKS.md's "page size budget report".
   // Regenerated on every `npm run verify`; gitignored like dist/ itself.
   it('writes a page-size-vs-budget report', () => {
     const rows = listHtmlFiles()
