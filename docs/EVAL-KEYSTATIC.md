@@ -1,6 +1,10 @@
 # Keystatic 평가 메모
 
-작성: 2026-09-08 (T10) · 이 프로젝트의 진짜 목적(SPEC §1)에 대한 결과물.
+작성: 2026-09-08 (T10, GitHub 모드 절 2026-09-08 추가) · 이 프로젝트의 진짜 목적(SPEC §1)에 대한 결과물.
+
+> §1~§5는 local 모드 기준(T10 스모크 당시)이고, §6~§7은 이후 GitHub 모드로 확장하면서
+> 추가됨(SPEC §8). local 모드 관련 결론은 그대로 유효 — GitHub 모드는 로컬 개발 시
+> 시크릿을 안 주면 여전히 local 모드로 동작한다.
 
 ## 0. 요약
 
@@ -134,20 +138,57 @@ T0~T9 작업 중 스크린샷으로 여러 페이지(홈·포스트 상세·태�
 조건부가 아니라 그냥 "권장"에 가깝지만, 최종 채택 여부·GitHub 모드 전환 여부는 명시적으로
 사람이 판단할 몫으로 남긴다.
 
-## 6. Keystatic GitHub 모드 소감 (SPEC §5 — local 모드만 평가, 참고용)
+## 6. Keystatic GitHub 모드 (2026-09-08 — SPEC §8, 실측 대기)
 
-GitHub 모드는 이번 프로젝트에서 실제로 써보지 않았다(SPEC 비목표). local 모드의 동작
-(파일 즉시 쓰기, git 커밋은 사람/CI 몫)으로 미루어 보면 GitHub 모드는 "저장 = 커밋
-(또는 PR)"으로 바뀌는 구조라 추측되는데, 이건 문서만 읽고 하는 추정이라 실측 근거가
-없다 — 실서비스에서 GitHub 모드가 필요해지면 별도로 검증이 필요하다.
+사용자가 Vercel에 배포한 뒤 배포된 URL에서 직접 편집하고 싶다고 요청해서, 원래 v0.1
+비목표였던 GitHub 모드를 실제로 구현했다(§7의 절차 참고). **코드는 들어갔지만, 실제
+OAuth 로그인·저장 흐름은 이 세션에서 검증하지 못했다** — GitHub OAuth App 생성과 Vercel
+환경변수 등록이 사용자만 할 수 있는 단계라서다. 코드 레벨에서 확인한 것과 아직 모르는 것을
+구분해서 남긴다.
 
-## 7. 배포 절차 (Vercel)
+**확인함(node_modules 소스 직접 추적 + 실제 빌드/브라우저 테스트)**:
+- `@keystatic/astro`가 `/keystatic`·`/api/keystatic` 두 라우트만 `prerender:false`로
+  주입 — local 모드 때와 달리 이 두 라우트만 서버 렌더링이 필요하고 나머지 페이지는 그대로
+  정적이라는 것.
+- OAuth 콜백 경로(`/api/keystatic/github/oauth/callback`)와 필요한 시크릿 3개
+  (`KEYSTATIC_GITHUB_CLIENT_ID`/`_SECRET`, `KEYSTATIC_SECRET`) — 소스에서 정확한 이름 확인.
+- `storage`를 환경변수로 local/github 자동 분기하게 만들어서, 로컬 개발 경험(§1~§4의
+  관찰)은 그대로 유지됨 — 로컬에 시크릿을 안 넣으면 지금까지 쓰던 local 모드 그대로(실측:
+  `npm run dev` 후 `/keystatic`이 대시보드를 바로 보여줌, 로그인 화면 없음).
+- **실제 버그를 하나 잡음**: storage 분기를 `process.env.KEYSTATIC_GITHUB_CLIENT_ID`로 짰더니
+  브라우저 콘솔에 `ReferenceError: process is not defined`로 관리자 UI가 하이드레이션조차
+  안 됨 — `keystatic.config.ts`가 서버뿐 아니라 브라우저 번들에도 포함되는데 `process`는
+  Node 전역이라 브라우저엔 없어서다. `PUBLIC_` 접두사 붙인 별도 플래그(`PUBLIC_
+  KEYSTATIC_STORAGE`)로 `import.meta.env`를 통해 읽도록 고쳐서 해결(실측: 이 플래그를
+  `github`로 주니 실제로 "Log in with GitHub" 화면이 뜨는 것까지 확인).
+- **`astro preview`가 `@astrojs/vercel` 어댑터에서 아예 안 됨**("The @astrojs/vercel adapter
+  does not support the preview command") — `npm run preview`를 `vite preview --outDir
+  dist/client`로 바꿔서 정적 공개 페이지만 서빙하도록 함. `/keystatic`까지 로컬에서 통째로
+  재현하려면 Vercel의 `vercel dev` CLI가 필요(별도 로그인 필요, 이 프로젝트엔 안 붙임).
 
-실행은 사람 선택(`docs/WORKFLOW.md` §4) — 아래는 절차 문서일 뿐, 이 세션에서 실행하지
-않았다.
+**아직 실측 못 함(사용자가 §7 1~4단계를 마친 뒤 확인 필요)**:
+- 실제 GitHub OAuth 로그인 화면이 뜨는지, 로그인 후 저장이 진짜 커밋을 만드는지.
+- "저장 = 즉시 커밋"인지 "저장 = PR 생성"인지(GitHub 모드는 브랜치 전략에 따라 다를 수 있음 —
+  기본값은 즉시 커밋으로 추정되나 미확인).
+- 로그인 세션 유지 시간, 여러 명이 동시 편집할 때의 충돌 처리.
+- Vercel 서버리스 함수의 콜드 스타트가 `/keystatic` 첫 로딩 체감 속도에 미치는 영향.
+
+이 항목들은 사용자가 실제로 로그인해서 글을 하나 써본 뒤, 다음 세션에서 실측 근거로
+채워야 한다.
+
+## 7. 배포 절차 (Vercel — 2026-09-08 기준 GitHub 모드 포함)
 
 1. Vercel 대시보드 → New Project → GitHub 리포(`Trapa-Eureka/astro-page`) 연결(private도 가능).
-2. Framework Preset: Astro 자동 감지. Build Command `npm run build`, Output Directory `dist`, Install Command `npm install`.
-3. 환경변수 불필요 — `SKIP_KEYSTATIC`은 `build` 스크립트 안에서 자체 설정됨.
-4. Deploy → 빌드 로그에서 dist에 `/keystatic` 경로 없음(정적 사이트) 확인.
-5. 도메인 확정되면 `astro.config.mjs`의 placeholder `site` 값을 실제 도메인으로 바꾸고 재배포.
+   **완료**(사용자가 이미 배포함: `https://astro-page-sigma.vercel.app`).
+2. Framework Preset: Astro 자동 감지 — `@astrojs/vercel` 어댑터가 있으면 Vercel의 Build
+   Output API로 알아서 빌드/배포되므로 Build/Output 커맨드를 수동 설정할 필요 없음.
+3. **GitHub OAuth App 생성** — `https://github.com/settings/developers` → New OAuth App:
+   - Homepage URL: `https://astro-page-sigma.vercel.app`
+   - Authorization callback URL: `https://astro-page-sigma.vercel.app/api/keystatic/github/oauth/callback`
+   - Client ID·Client Secret 복사.
+4. **Vercel 환경변수 4개 등록**(Project Settings → Environment Variables, Production):
+   `PUBLIC_KEYSTATIC_STORAGE=github`, `KEYSTATIC_GITHUB_CLIENT_ID`,
+   `KEYSTATIC_GITHUB_CLIENT_SECRET`(3단계에서 복사한 값), `KEYSTATIC_SECRET`(직접 생성한
+   랜덤 문자열, 예: `openssl rand -hex 32`) → 등록 후 재배포.
+5. `https://astro-page-sigma.vercel.app/keystatic` 접속 → GitHub 로그인 확인. 도메인이
+   나중에 바뀌면 `astro.config.mjs`의 `site`와 OAuth App의 콜백 URL을 함께 갱신해야 한다.

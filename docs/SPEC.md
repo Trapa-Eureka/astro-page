@@ -47,16 +47,30 @@
 ## 5. v0.1 비목표
 
 - 검색, 댓글, 다크모드, 뉴스레터, 다국어(i18n)
-- Keystatic GitHub 모드·클라우드 인증 (local 모드만 — 평가 메모에 GitHub 모드 소감만 기록)
-- React 아일랜드 사용(관리자 UI 제외), 외부 서비스(폰트 CDN·애널리틱스)
-- 실배포 자동화 — Vercel 배포 **절차 문서**까지만(T10), 실행은 사람 선택 (2026-09-08: 배포 타깃을 Cloudflare Pages에서 Vercel로 변경 — 정적 사이트라 어댑터 불필요, private 리포도 그대로 배포 가능)
+- React 아일랜드 사용(공개 페이지 한정 — 관리자 UI는 원래부터 React), 외부 서비스(폰트 CDN·애널리틱스)
+- 실배포 자동화 — Vercel 배포 **절차 문서**까지만(T10), 실행은 사람 선택 (2026-09-08: 배포 타깃을 Cloudflare Pages에서 Vercel로 변경)
+
+> **2026-09-08 범위 확장**: "Keystatic GitHub 모드는 비목표(local 모드만 평가)"였던 항목을
+> 사용자 요청으로 실제 구현함 — 배포된 사이트에서 직접 편집이 필요해서다. §8 참고. 위
+> "실배포 자동화" 줄의 원래 전제(정적 사이트라 어댑터 불필요)도 이 결정 때문에 깨졌다: 공개
+> 페이지는 여전히 정적이지만, `/keystatic`·`/api/keystatic` 두 라우트를 온디맨드로 돌리려고
+> `@astrojs/vercel` 어댑터를 붙였다.
 
 ## 6. 성공 기준 (v0.1 완료 판정)
 
-- `npm run check` 통과 + `npm run verify` 전 항목 그린(TESTING §4 — 링크 무결성·RSS/sitemap·alt·용량 예산·keystatic 부재·외부 요청 0 포함).
+- `npm run check` 통과 + `npm run verify` 전 항목 그린(TESTING §4 — 링크 무결성·RSS/sitemap·alt·용량 예산·외부 요청 0 포함). verify는 정적 `dist/` 산출물만 검사하며, `/keystatic`·`/api/keystatic`(온디맨드, §8)는 이 범위 밖이다.
 - 스키마 패리티 테스트 통과(keystatic.config ↔ content.config 드리프트 0).
 - **사람 스모크**: `npm run dev` → /keystatic에서 포스트 1편 신규 작성 → 파일 생성 확인 → 빌드에 반영 확인.
 - Keystatic 평가 메모(docs/EVAL-KEYSTATIC.md) 작성 완료 — 편집 UX·스키마 표현력·제약·실서비스 채택 판단.
+
+## 8. Keystatic GitHub 모드 (2026-09-08 추가)
+
+배포된 사이트(Vercel)에서 직접 콘텐츠를 편집하려면 정적 호스팅만으로는 불가능 — GitHub
+OAuth 로그인과 GitHub API 호출을 요청 시점에 서버에서 처리해야 한다. `keystatic.config.ts`가
+환경변수(`KEYSTATIC_GITHUB_CLIENT_ID` 존재 여부)로 local/GitHub storage를 자동 분기하고,
+`@astrojs/vercel` 어댑터가 `/keystatic`·`/api/keystatic` 두 라우트만 온디맨드로 서빙한다.
+나머지 페이지는 그대로 정적 프리렌더. 보안: 저장소가 private이라 쓰기 권한 있는 GitHub
+계정만 로그인·저장 가능. 절차·env var 값은 `docs/EVAL-KEYSTATIC.md` §7·§8 참고.
 
 ## 7. 미결 사항
 
