@@ -1,79 +1,81 @@
 # SPEC — astro-test v0.1
 
-작성: 2026-09-06 · 상태: 확정 (변경 시 이 문서를 먼저 수정)
+Written: 2026-09-06 · Status: final (change this document first, then the code)
 
-## 1. 목적
+## 1. Purpose
 
-이 프로젝트는 두 가지를 검증하는 **테스트 사이트**다:
+This project is a **test site** that validates two things:
 
-1. **Keystatic 평가** — git 기반 파일 CMS로서 편집 경험·스키마 표현력·Astro 궁합이 실서비스(콘텐츠형 제품) CMS 후보로 쓸 만한지. 완료 시 장단점을 정리한 "Keystatic 평가 메모"를 산출한다(T10).
-2. **에디토리얼 블로그 템플릿 확보** — 이후 실제 블로그·콘텐츠 사이트에 재사용할 수 있는 Astro 정적 사이트 골격(콘텐츠 모델·검증 스위트 포함).
+1. **Evaluating Keystatic** — as a git-based file CMS, is its editing experience, schema expressiveness, and fit with Astro good enough to make it a candidate CMS for a real content product? The deliverable is a "Keystatic evaluation memo" summarizing the pros and cons (T10).
+2. **Producing an editorial blog template** — an Astro static-site skeleton (content model and verification suite included) that can be reused for real blogs and content sites later.
 
-사이트 정체: 가상 웹개발 회사 **Makinilya Studio**의 기술 블로그 "Makinilya Engineering". 회사·저자·프로젝트는 전부 픽션이며 이름은 플레이스홀더다.
+Site identity: "Makinilya Engineering", the technical blog of the fictional web development company **Makinilya Studio**. The company, authors, and projects are all fiction, and the names are placeholders.
 
-## 2. 레퍼런스 차용 범위 (theguardian.engineering)
+## 2. Scope of what is borrowed from the reference (theguardian.engineering)
 
-**차용하는 것 — 레이아웃 문법 수준:**
-- 에디토리얼 위계: 큰 세리프 헤드라인 + 절제된 본문, 넉넉한 행간·여백
-- 홈 = 최신순 기사 리스트(제목·저자·날짜·한 줄 발췌), 장식 최소
-- 기사 페이지 = 단일 칼럼 프로즈(가독폭 ~68ch), 명확한 메타(저자·날짜·읽기 시간), 코드블록·인용 스타일
-- 잉크 계열 포인트 컬러 1개 + 백지 배경의 절제된 팔레트, 미니멀 헤더/푸터
+**What we borrow — at the level of layout grammar:**
+- Editorial hierarchy: large serif headlines over restrained body copy, generous line height and whitespace
+- Home = a reverse-chronological article list (title, author, date, one-line excerpt) with minimal ornament
+- Article page = a single prose column (readable measure ~68ch), clear metadata (author, date, reading time), code block and blockquote styling
+- A restrained palette: one ink-family accent color on a white paper background, minimal header and footer
 
-**금지하는 것 (가드레일 1과 동일):**
-- Guardian의 문장·헤드라인·본문 텍스트 일체, 로고·아이콘, 전용 서체(Guardian Egyptian/Headline 등), 브랜드 컬러의 정확 복제, 스크린샷 에셋 사용
+**What is forbidden (same as guardrail 1):**
+- Any Guardian sentence, headline, or body text; their logos and icons; their proprietary typefaces (Guardian Egyptian/Headline, etc.); exact reproductions of their brand colors; use of screenshot assets
 
-**대체 선택:** 서체는 셀프호스팅 오픈 폰트 — 헤드라인 Source Serif 4(또는 Newsreader), 본문·UI Inter. 포인트 컬러는 자체 토큰(딥 인디고 계열)로 정의.
+**Our alternatives:** typefaces are self-hosted open fonts — Source Serif 4 (or Newsreader) for headlines, Inter for body and UI. The accent color is defined as our own token (a deep indigo).
 
-## 3. 페이지·기능 범위 (v0.1)
+## 3. Page and feature scope (v0.1)
 
-| 라우트 | 내용 |
+| Route | Contents |
 |---|---|
-| `/` | 최신순 포스트 리스트, 페이지당 10개 + 페이지네이션(`/page/2`) |
-| `/posts/[slug]` | 기사 — 제목·저자(들)·날짜·읽기 시간·본문(Markdoc)·태그 링크 |
-| `/tags/[tag]` | 해당 태그 포스트 리스트 |
-| `/about` | 가상 회사 소개(픽션 명시 톤) + 저자 3인 소개 |
-| `/rss.xml`, `/sitemap-*.xml` | 구독·색인 (draft 제외) |
-| `/404` | 홈·최신 글 링크 |
-| `/keystatic` | **개발 전용** 관리자 UI — 프로덕션 빌드에서 제외 |
+| `/` | Reverse-chronological post list, 10 per page + pagination (`/page/2`) |
+| `/posts/[slug]` | Article — title, author(s), date, reading time, body (Markdoc), tag links |
+| `/tags/[tag]` | Post list for that tag |
+| `/about` | Introduction to the fictional company (in an explicitly fictional tone) + the three authors |
+| `/rss.xml`, `/sitemap-*.xml` | Subscription and indexing (drafts excluded) |
+| `/404` | Links to home and recent posts |
+| `/keystatic` | **Development only** admin UI — excluded from production builds |
 
-기능 규칙: draft=true 포스트는 프로덕션 빌드·RSS·sitemap에서 제외(개발 서버에선 보임). 읽기 시간은 단어수 기반 순수 함수. 모든 이미지 alt 필수. 다크모드는 비목표.
+Feature rules: posts with draft=true are excluded from the production build, RSS, and sitemap (they remain visible on the dev server). Reading time is a pure function based on word count. Alt text is mandatory on every image. Dark mode is a non-goal.
 
-## 4. 콘텐츠 (전부 자작)
+## 4. Content (all original)
 
-- 포스트 6~8편: 가상 회사의 웹개발 주제(예: "정적 사이트에 CMS를 붙이며 배운 것", "디자인 토큰으로 리브랜딩 하루 만에 끝내기", "빌드 검증 스위트가 QA를 대체한 6개월"). 기술 내용은 일반 지식 수준의 자작 서술 — 실존 단체·인물 관련 사실 주장 금지.
-- 저자 3인(픽션): 이름·역할·짧은 소개. 태그 6~10개.
-- 언어: 영문 기본(글로벌 템플릿 재사용 고려). 한국어 병기는 비목표.
+- 6–8 posts on web development topics from the fictional company (e.g. "What we learned bolting a CMS onto a static site", "Rebranding in a day with design tokens", "Six months of a build verification suite standing in for QA"). The technical content is original writing at the level of general knowledge — no factual claims about real organizations or people.
+- Three fictional authors: name, role, short bio. 6–10 tags.
+- Language: English by default (so the template can be reused globally). Bilingual Korean text is a non-goal.
 
-## 5. v0.1 비목표
+## 5. Non-goals for v0.1
 
-- 검색, 댓글, 다크모드, 뉴스레터, 다국어(i18n)
-- React 아일랜드 사용(공개 페이지 한정 — 관리자 UI는 원래부터 React), 외부 서비스(폰트 CDN·애널리틱스)
-- 실배포 자동화 — Vercel 배포 **절차 문서**까지만(T10), 실행은 사람 선택 (2026-09-08: 배포 타깃을 Cloudflare Pages에서 Vercel로 변경)
+- Search, comments, dark mode, newsletter, internationalization (i18n)
+- Using React islands (on public pages only — the admin UI was always React), external services (font CDNs, analytics)
+- Automated production deployment — only a **written deployment procedure** for Vercel (T10); running it is a human decision (2026-09-08: the deploy target changed from Cloudflare Pages to Vercel)
 
-> **2026-09-08 범위 확장**: "Keystatic GitHub 모드는 비목표(local 모드만 평가)"였던 항목을
-> 사용자 요청으로 실제 구현함 — 배포된 사이트에서 직접 편집이 필요해서다. §8 참고. 위
-> "실배포 자동화" 줄의 원래 전제(정적 사이트라 어댑터 불필요)도 이 결정 때문에 깨졌다: 공개
-> 페이지는 여전히 정적이지만, `/keystatic`·`/api/keystatic` 두 라우트를 온디맨드로 돌리려고
-> `@astrojs/vercel` 어댑터를 붙였다.
+> **2026-09-08 scope expansion**: "Keystatic's GitHub mode is a non-goal (evaluate local mode only)" was
+> actually implemented at the user's request — editing directly from the deployed site turned out to be
+> necessary. See §8. That decision also broke the original premise behind the "automated production
+> deployment" line above (that a static site needs no adapter): the public pages are still static, but we
+> added the `@astrojs/vercel` adapter so the two routes `/keystatic` and `/api/keystatic` can run
+> on-demand.
 
-## 6. 성공 기준 (v0.1 완료 판정)
+## 6. Success criteria (how we decide v0.1 is done)
 
-- `npm run check` 통과 + `npm run verify` 전 항목 그린(TESTING §4 — 링크 무결성·RSS/sitemap·alt·용량 예산·외부 요청 0 포함). verify는 정적 `dist/` 산출물만 검사하며, `/keystatic`·`/api/keystatic`(온디맨드, §8)는 이 범위 밖이다.
-- 스키마 패리티 테스트 통과(keystatic.config ↔ content.config 드리프트 0).
-- **사람 스모크**: `npm run dev` → /keystatic에서 포스트 1편 신규 작성 → 파일 생성 확인 → 빌드에 반영 확인.
-- Keystatic 평가 메모(docs/EVAL-KEYSTATIC.md) 작성 완료 — 편집 UX·스키마 표현력·제약·실서비스 채택 판단.
+- `npm run check` passes and every item in `npm run verify` is green (TESTING §4 — link integrity, RSS/sitemap, alt text, size budget, zero external requests). verify inspects only the static `dist/` output; `/keystatic` and `/api/keystatic` (on-demand, §8) are outside its scope.
+- The schema parity test passes (zero drift between keystatic.config and content.config).
+- **Human smoke test**: `npm run dev` → write a brand-new post in /keystatic → confirm the file is created → confirm it shows up in the build.
+- The Keystatic evaluation memo (docs/EVAL-KEYSTATIC.md) is written — editing UX, schema expressiveness, limitations, and a verdict on adopting it for a real product.
 
-## 8. Keystatic GitHub 모드 (2026-09-08 추가)
+## 8. Keystatic GitHub mode (added 2026-09-08)
 
-배포된 사이트(Vercel)에서 직접 콘텐츠를 편집하려면 정적 호스팅만으로는 불가능 — GitHub
-OAuth 로그인과 GitHub API 호출을 요청 시점에 서버에서 처리해야 한다. `keystatic.config.ts`가
-환경변수(`KEYSTATIC_GITHUB_CLIENT_ID` 존재 여부)로 local/GitHub storage를 자동 분기하고,
-`@astrojs/vercel` 어댑터가 `/keystatic`·`/api/keystatic` 두 라우트만 온디맨드로 서빙한다.
-나머지 페이지는 그대로 정적 프리렌더. 보안: 저장소가 private이라 쓰기 권한 있는 GitHub
-계정만 로그인·저장 가능. 절차·env var 값은 `docs/EVAL-KEYSTATIC.md` §7·§8 참고.
+Editing content directly from the deployed site (Vercel) is impossible with static hosting alone — GitHub
+login and GitHub API calls have to be handled on a server at request time. `keystatic.config.ts` switches
+automatically between local and GitHub storage based on an environment variable (whether
+`KEYSTATIC_GITHUB_CLIENT_ID` is present), and the `@astrojs/vercel` adapter serves just the two routes
+`/keystatic` and `/api/keystatic` on-demand. Every other page remains a static prerender. Security: the
+repository is private, so only GitHub accounts with write access can log in and save. For the procedure and
+the env var values, see `docs/EVAL-KEYSTATIC.md` §7 and §8.
 
-## 7. 미결 사항
+## 7. Open questions
 
-- [ ] 회사명 Makinilya Studio 유지 여부 (플레이스홀더 — 교체 시 settings 싱글턴 1곳 수정)
-- [ ] 헤드라인 서체 최종안(Source Serif 4 vs Newsreader) — T2 시각 리뷰에서 결정
-- [ ] 페이지 용량 예산 기본값 100KB(폰트 제외)의 적정성 — verify 도입 후 조정
+- [ ] Whether to keep the company name Makinilya Studio (it's a placeholder — replacing it means editing the settings singleton in one place)
+- [ ] Final choice of headline typeface (Source Serif 4 vs Newsreader) — to be decided in the T2 visual review
+- [ ] Whether the default page size budget of 100KB (excluding fonts) is the right number — adjust once verify is in place

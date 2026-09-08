@@ -12,7 +12,7 @@ export function publishedPosts(
     .toSorted((a, b) => {
       const byDate = b.data.pubDate.getTime() - a.data.pubDate.getTime();
       // Stable tiebreaker for same-day posts so ordering doesn't depend on filesystem
-      // iteration order (TESTING.md §2: "동일 날짜 안정 정렬").
+      // iteration order (TESTING.md §2: "stable sort for same-day posts").
       return byDate !== 0 ? byDate : a.id.localeCompare(b.id);
     });
 }
@@ -21,8 +21,8 @@ export function totalPages(itemCount: number, pageSize = 10): number {
   return Math.max(1, Math.ceil(itemCount / pageSize));
 }
 
-// Page 1 lives at "/" (SPEC.md §3: "/page/2"), so page number -> URL isn't just
-// `/page/${n}` uniformly — this is the one place that boundary is encoded.
+// Page 1 lives at "/" (SPEC.md §3: pagination starts at "/page/2"), so page number ->
+// URL isn't just `/page/${n}` uniformly — this is the one place that boundary is encoded.
 export function pageHref(pageNumber: number): string {
   return pageNumber <= 1 ? '/' : `/page/${pageNumber}`;
 }

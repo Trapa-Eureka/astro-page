@@ -3,7 +3,7 @@ import { extname, join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { listAllDistFiles, ROOT_DIR } from './helpers';
 
-// TESTING.md §4 "콘텐츠 정책": no trace of the layout reference anywhere in dist or in
+// TESTING.md §4 "Content policy": no trace of the layout reference anywhere in dist or in
 // authored content (CLAUDE.md guardrail 1). Grep-shaped, case-insensitive.
 
 // T8 broadens this beyond T7's original three — same guardrail (CLAUDE.md #1), more

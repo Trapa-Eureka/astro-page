@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DIST_DIR, draftPostSlugs, listHtmlFiles, loadHtml, loadXml, urlPathFor } from './helpers';
 
-// TESTING.md §4 "메타·구독"
+// TESTING.md §4 "Metadata & subscriptions"
 
 describe('every page: title, meta description, OG(title/type/url)', () => {
   for (const file of listHtmlFiles()) {

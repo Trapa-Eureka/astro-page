@@ -1,6 +1,6 @@
 // Fixed locale + UTC — a pubDate of "2026-01-15" must render as "January 15, 2026"
 // everywhere, regardless of the reader's or the build machine's system locale/timezone
-// (TESTING.md §2: "로케일 고정, 시스템 의존 금지").
+// (TESTING.md §2: "fixed locale, no system dependence").
 const FORMATTER = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'long',

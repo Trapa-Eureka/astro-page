@@ -10,7 +10,7 @@ import {
   urlPathFor,
 } from './helpers';
 
-// TESTING.md §4 "존재·무결성"
+// TESTING.md §4 "Existence & integrity"
 
 let htmlFiles: string[];
 let postPageCount: number;
