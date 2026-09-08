@@ -20,6 +20,13 @@ pnpm-debug.log*
 .env
 .env.production
 
+# local screenshots kept next to the docs while troubleshooting — never commit these:
+# dashboard captures can expose deployment settings and environment-variable configuration
+docs/*.png
+docs/*.jpg
+docs/*.jpeg
+docs/*.webp
+
 # macOS-specific files
 .DS_Store
 
