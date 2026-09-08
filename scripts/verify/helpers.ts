@@ -7,13 +7,20 @@ import { load } from 'cheerio';
 // than reading dist directly, so "how we walk dist" stays in one place.
 
 export const ROOT_DIR = process.cwd();
-export const DIST_DIR = join(ROOT_DIR, 'dist');
+// Since the @astrojs/vercel adapter was added (2026-09-08, GitHub-mode Keystatic —
+// docs/DESIGN.md §1), Astro's static output moved from dist/ straight to dist/client/
+// (dist/ also holds the adapter's server bundle now). Fall back to dist/ itself so this
+// still works if the adapter is ever removed.
+const DIST_ROOT = join(ROOT_DIR, 'dist');
+export const DIST_DIR = existsSync(join(DIST_ROOT, 'client'))
+  ? join(DIST_ROOT, 'client')
+  : DIST_ROOT;
 export const SRC_CONTENT_DIR = join(ROOT_DIR, 'src', 'content');
 
 export function requireDist(): void {
   if (!existsSync(DIST_DIR)) {
     throw new Error(
-      'dist/ not found. `npm run verify` inspects a production build — run `npm run build` first.',
+      'dist/client not found. `npm run verify` inspects a production build — run `npm run build` first.',
     );
   }
 }

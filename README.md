@@ -8,7 +8,7 @@
 
 ## 스택 요약
 
-Astro(최신 안정, TS strict) + Keystatic(local 모드, 관리자 UI는 개발 전용) + React·Markdoc 통합 + 자작 CSS 디자인 토큰 + 셀프호스팅 오픈 폰트. 프로덕션 빌드는 `SKIP_KEYSTATIC=true`로 관리자 라우트를 제외한 완전 정적 사이트다.
+Astro(최신 안정, TS strict) + Keystatic(로컬은 local 모드, Vercel 프로덕션은 GitHub 모드 — 환경변수로 자동 분기) + React·Markdoc 통합 + `@astrojs/vercel` 어댑터 + 자작 CSS 디자인 토큰 + 셀프호스팅 오픈 폰트. 공개 콘텐츠 페이지는 완전 정적, `/keystatic`·`/api/keystatic`만 온디맨드 서버 렌더링(GitHub OAuth 보호).
 
 ## 문서 맵
 
@@ -32,16 +32,17 @@ Astro(최신 안정, TS strict) + Keystatic(local 모드, 관리자 UI는 개발
 npm install
 npm run check      # astro check + lint + format:check + vitest(unit) — 공통 게이트
 npm run dev        # 개발 서버: http://localhost:4321 (+ /keystatic 관리자 UI)
-npm run build       # SKIP_KEYSTATIC=true 정적 빌드 → dist/
-npm run verify      # 빌드 산출물 검사 스위트 (빌드 후 실행, cheerio+fs만)
-npm run preview     # dist/ 로컬 미리보기: http://localhost:4321
+npm run build       # 정적 빌드(어댑터 포함) → dist/client(공개 페이지) + 서버 함수(/keystatic)
+npm run verify      # 빌드 산출물 검사 스위트 (빌드 후 실행, cheerio+fs만, dist/client만 검사)
+npm run preview     # dist/client 로컬 미리보기 (vite preview — astro preview는 어댑터가 미지원)
 ```
 
 `package.json`에 새 의존성이 추가된 커밋을 받은 뒤에는(`git pull` 직후) `npm install`을 먼저
 해야 `npm run dev`/`verify`가 정상 동작한다 — `node_modules`는 git에 커밋되지 않는다.
 
 **라우트**: `/`(홈, 페이지네이션 `/page/2`~) · `/posts/[slug]` · `/tags/[tag]` · `/about` ·
-`/404` · `/rss.xml` · `/sitemap-index.xml` · `/keystatic`(개발 전용).
+`/404` · `/rss.xml` · `/sitemap-index.xml` · `/keystatic`(로컬은 local 모드, 배포된
+사이트에선 GitHub OAuth 로그인 — `docs/EVAL-KEYSTATIC.md` §6~§7).
 
 ## 상태
 
@@ -57,3 +58,4 @@ npm run preview     # dist/ 로컬 미리보기: http://localhost:4321
 - 2026-09-07: **T8 완료** — draft 제외를 dist 전 경로(라우트 부재 + 어디서도 링크 안 됨)로 재확인, `/keystatic` href 스캔 정밀화(경로·JS파일·script태그 3중 확인 — 처음엔 콘텐츠 텍스트 전수 스캔으로 시도했다가 "Shipping a CMS..." 포스트 본문이 정당하게 "Keystatic"을 언급해서 오탐 발생 → href 기반 검사로 교체), 금지 문자열 목록·확장자 확대(.mjs/.json 포함), 페이지 용량 리포트(`scripts/verify/reports/page-sizes.json`, gitignore 대상) 추가. 네거티브 확인(draft 링크 실제로 심어봄) 통과. `npm run check`(53/53)·`npm run verify`(80/80) 그린.
 - 2026-09-08: **T9 완료** — 시드 콘텐츠(발췌·태그) 재검토: 발췌 전부 200자 제한 내(122~148자), 태그 10종 중복 없이 정리돼 있음을 확인, 수정 불필요. 실제 브라우저로 홈/포스트(커버 유무 모두)/태그/about/404/`/keystatic`(dev)를 열어 콘솔 확인 — warning·error 0(React DevTools 안내 같은 정상 INFO 로그만). README 퀵스타트를 실제 명령어·라우트 목록으로 갱신. `npm run check`(53/53)·`npm run verify`(80/80) 그린, `npm run preview` 기동 확인(홈·포스트·rss.xml 200). T0~T9 전부 완료 — 다음은 T10(사람 스모크 + 평가 메모).
 - 2026-09-08: **T10 완료** — `/keystatic`에서 실제로 포스트 신규 작성(커버·저자·태그 포함)→파일 생성 확인→draft 토글→빌드 반영/제외 확인→**삭제**까지 CRUD 전체를 실행(삭제 시 첨부 이미지가 안 지워지는 걸 발견, 수동 정리 후 재확인). `docs/EVAL-KEYSTATIC.md` 작성 — 편집 UX·스키마 표현력(이미지 필드의 image() 비호환, 조건부 필수 미지원)·패리티 유지 비용(실측 근거 포함) 정리, 실서비스 채택은 조건부 권장으로 초안 작성(최종 판단은 사람 몫). 배포 절차를 Cloudflare Pages→Vercel로 전환해 5줄로 문서화(`docs/SPEC.md`·`WORKFLOW.md`도 함께 갱신). 시각 리뷰(서체·간격·모바일 폭)는 WORKFLOW.md §4에 따라 사람 확인 대기. `npm run check`(53/53)·`npm run verify`(80/80) 그린. **T0~T10 전부 완료** — 남은 건 사람의 시각 리뷰 + 평가 메모 최종 승인 + 리포 visibility·배포 실행 여부 결정.
+- 2026-09-08: **Keystatic GitHub 모드 도입**(사용자가 Vercel에 배포한 뒤 `/keystatic`이 404라 요청) — 사용자 요청으로 T10에서 확정한 "local 모드만" 범위를 확장. `@astrojs/vercel` 어댑터 추가(공개 페이지는 여전히 정적, `/keystatic`·`/api/keystatic`만 온디맨드), `keystatic.config.ts`가 `PUBLIC_KEYSTATIC_STORAGE` 환경변수로 local/github storage 자동 분기. 실제 버그 2개 발견해서 고침: (1) `process.env`로 분기했더니 브라우저 번들에서 `ReferenceError: process is not defined`로 관리자 UI가 아예 안 뜸 — `import.meta.env`의 `PUBLIC_` 접두사 변수로 교체해서 해결(로컬 재현·수정 확인 완료), (2) `@astrojs/vercel`은 `astro preview`를 지원 안 해서 `npm run preview`가 깨짐 — `vite preview --outDir dist/client`로 교체. `dist/` 구조도 `dist/client/`로 바뀌어서 `scripts/verify/`의 DIST_DIR과 "keystatic·JS 부재" 검사 2개를 "공개 페이지가 참조 안 하는지"로 재설계(원본 파일 자체는 어드민 클라이언트 번들이라 이제 정당하게 존재함). CLAUDE.md 가드레일 3 개정, SPEC.md §8 추가. `npm run check`(53/53)·`npm run verify`(79/79)·`npm run build`·`npm run preview` 전부 실측 그린. GitHub OAuth App 생성·Vercel 환경변수 등록(4개)은 사용자 몫 — `docs/EVAL-KEYSTATIC.md` §7.

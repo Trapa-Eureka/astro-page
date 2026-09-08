@@ -26,6 +26,11 @@
 
 ## 4. verify 체크리스트 (scripts/verify/ — dist 검사, 삭제·완화 금지)
 
+이 체크리스트는 **정적 프리렌더 산출물**(dist/)만 본다. `/keystatic`·`/api/keystatic`은
+2026-09-08부터 GitHub 모드로 프로덕션에도 존재하지만 `prerender: false`라 dist에 정적
+파일로 안 떨어지고 어댑터가 별도 서버리스 함수로 배포한다 — 그래서 이 스위트의 범위 밖이고,
+아래 항목들은 코드 수정 없이 계속 유효하다(`docs/DESIGN.md` §1·§5).
+
 **존재·무결성**
 - [ ] 공개 포스트 수 = `/posts/*/index.html` 수, 각 페이지에 h1 정확히 1개
 - [ ] 모든 내부 링크(`/`로 시작)가 dist 내 실제 파일로 해석됨(앵커 포함), 404 없음
@@ -41,7 +46,7 @@
 - [ ] `<img>` alt 100% (빈 문자열은 장식 이미지 표시가 있을 때만)
 - [ ] header/main/footer 랜드마크 존재, 스킵 링크 존재
 - [ ] 외부 origin 참조 0 (href/src/preload 전수 스캔 — 폰트·스크립트 자급)
-- [ ] **dist에 keystatic 경로·React 런타임 청크 부재** (SKIP_KEYSTATIC 배선 증명)
+- [ ] **정적 dist에 keystatic 경로·React 런타임 청크 부재** (프리렌더 산출물이 여전히 순수 정적인지 증명 — `/keystatic` 자체의 존재 여부는 이 검사 범위 밖, 위 안내 참고)
 - [ ] 페이지 HTML ≤ 100KB(폰트 제외), 초과 시 목록 출력
 
 **콘텐츠 정책**

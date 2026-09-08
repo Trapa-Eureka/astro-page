@@ -5,14 +5,25 @@
 ## 1. 아키텍처
 
 ```
-[편집]  npm run dev ──► /keystatic (관리자 UI, React) ──► src/content/* 파일 쓰기
-                                                        (storage: local)
-[소비]  Astro 콘텐츠 컬렉션(content.config.ts, zod) ──► 페이지 정적 생성
-[배포]  SKIP_KEYSTATIC=true astro build ──► dist/ (관리자 라우트·React 없음, 완전 정적)
-[검증]  npm run verify ──► dist를 cheerio로 검사 (TESTING §4)
+[로컬 편집]  npm run dev ──► /keystatic (관리자 UI, React) ──► src/content/* 파일 쓰기
+                                                            (storage: local — 시크릿 없을 때)
+[배포 편집]  https://<도메인>/keystatic ──► GitHub OAuth 로그인 ──► GitHub API로 커밋
+                                          (storage: github — Vercel에 시크릿 있을 때)
+[소비]      Astro 콘텐츠 컬렉션(content.config.ts, zod) ──► 페이지 정적 생성
+[배포]      astro build (어댑터: @astrojs/vercel) ──► dist/ = 공개 페이지(완전 정적)
+                                                     + /keystatic·/api/keystatic(온디맨드)
+[검증]      npm run verify ──► 정적 dist만 cheerio로 검사 (TESTING §4, 온디맨드 라우트는 범위 밖)
 ```
 
-- 통합: `integrations: [markdoc(), ...(process.env.SKIP_KEYSTATIC ? [] : [react(), keystatic()])]`. React는 Keystatic 관리자 UI 전용이라 keystatic()과 함께 조건부 마운트한다 — react()를 프로덕션에 무조건 포함시키면(당초 안) 페이지에서 실제로 쓰지 않아도 `@astrojs/react`가 참조되지 않는 React 런타임 청크(~190KB)를 dist에 남기는 것을 T0에서 확인했다(빈 청크라 HTML에서 로드되진 않지만 verify의 "React 런타임 청크 부재" 항목과 상충). markdoc()만 무조건 포함(본문 렌더링에 필요). 개발 서버에선 관리자·API 라우트가 살아 있고, 프로덕션 빌드는 어댑터 없이 정적으로 떨어진다.
+- 통합: `integrations: [markdoc(), sitemap(), react(), keystatic()]` — 전부 무조건 포함(2026-09-08
+  이전엔 `SKIP_KEYSTATIC`으로 react()·keystatic()을 프로덕션에서 뺐으나, GitHub 모드로
+  `/keystatic`을 프로덕션에도 노출하기로 하면서 그 배선을 걷어냈다). `adapter: vercel()` 추가.
+  `@keystatic/astro`의 `keystatic()`이 `/keystatic/[...params]`와 `/api/keystatic/[...params]`
+  두 라우트를 `injectRoute(..., { prerender: false })`로 직접 주입하므로, 다른 페이지는 손대지
+  않아도 이 둘만 온디맨드가 된다 — `output: 'static'`(기본값) 그대로 두고 어댑터만 있으면 되는
+  구조(Astro의 `hybridOutput` 어댑터 기능). `storage`는 `keystatic.config.ts`에서
+  `KEYSTATIC_GITHUB_CLIENT_ID` 존재 여부로 local/github를 자동 분기 — 로컬 개발은 시크릿 없이
+  local 모드 그대로.
 - 같은 파일을 Keystatic이 쓰고 Astro가 읽는다 — 두 스키마의 동기화는 패리티 테스트(§2 하단)가 강제한다.
 
 ## 2. 콘텐츠 모델 (이중 스키마의 단일 진실)
@@ -66,18 +77,35 @@ siteTitle · description · footerNote. 회사명 교체는 여기 1곳.
 
 ## 5. 빌드 베리파이어 (scripts/verify/ — vitest 프로젝트)
 
-빌드 산출물(dist/)만 검사한다. 브라우저·네트워크 0, cheerio + fs.
+빌드 산출물(dist/)의 **정적 프리렌더 부분**만 검사한다. 브라우저·네트워크 0, cheerio + fs.
+`/keystatic`·`/api/keystatic`는 `prerender: false`라 이 dist 안에 정적 파일로 안 떨어지고
+어댑터가 별도 서버리스 함수로 배포하므로, 이 스위트의 검사 범위 밖이다(2026-09-08 GitHub
+모드 도입 이후에도 이 사실은 안 바뀜 — 그래서 아래 항목들도 코드 수정 없이 그대로 유효).
 
-검사 항목(전체 목록은 TESTING §4): 전 포스트 페이지 존재 / 내부 링크·앵커 무결성 / img alt 100% / h1 유일성·랜드마크 / OG·title·description 메타 / RSS 파싱·항목 수 = 공개 포스트 수 / sitemap URL 수 일치·draft 부재 / **dist에 keystatic 경로·React 런타임 부재** / 외부 origin 참조 0 / 페이지 HTML ≤ 예산(기본 100KB, 폰트 제외) / 404 페이지 존재.
+검사 항목(전체 목록은 TESTING §4): 전 포스트 페이지 존재 / 내부 링크·앵커 무결성 / img alt 100% / h1 유일성·랜드마크 / OG·title·description 메타 / RSS 파싱·항목 수 = 공개 포스트 수 / sitemap URL 수 일치·draft 부재 / **정적 dist에 keystatic 경로·React 런타임 청크 부재**(어댑터의 서버리스 함수 출력물은 별도 — 이 검사는 프리렌더 산출물이 여전히 순수 정적인지만 본다) / 외부 origin 참조 0 / 페이지 HTML ≤ 예산(기본 100KB, 폰트 제외) / 404 페이지 존재.
 
 ## 6. 환경변수·스크립트
 
 ```
-# .env.example
-SKIP_KEYSTATIC=            # build 스크립트가 true로 설정. dev에선 비움
+# .env.example — 전부 비우면 로컬은 local storage로 동작 (기존과 동일)
+PUBLIC_KEYSTATIC_STORAGE=        # "github"로 설정해야 storage가 github 모드로 전환됨
+KEYSTATIC_GITHUB_CLIENT_ID=      # GitHub OAuth App
+KEYSTATIC_GITHUB_CLIENT_SECRET=  # GitHub OAuth App
+KEYSTATIC_SECRET=                # 세션 쿠키 암호화용 랜덤 문자열 (예: openssl rand -hex 32)
 ```
 
-package.json scripts: `check`(astro check+lint+format:check+vitest --project unit), `build`(SKIP_KEYSTATIC=true astro build), `verify`(vitest run --project verify — dist 필요), `dev`(astro dev, SKIP_KEYSTATIC 비움), `preview`(**SKIP_KEYSTATIC=true astro preview** — keystatic()이 켜져 있으면 Keystatic의 API 라우트 때문에 `output`이 static이 아닌 server로 강제되고, 어댑터가 없어 preview가 "No adapter found"로 실패한다; preview는 어차피 `build`가 만든 정적 dist를 보는 용도라 build와 동일하게 SKIP_KEYSTATIC을 켠다).
+`PUBLIC_KEYSTATIC_STORAGE`가 `PUBLIC_` 접두사인 이유: `keystatic.config.ts`는 서버뿐 아니라
+브라우저 번들에도 포함되는데(관리자 UI가 클라이언트에서도 스키마를 알아야 함), Vite는
+`PUBLIC_` 접두사 없는 변수를 클라이언트에 안 심어준다 — `process.env`를 직접 읽게 했더니
+"process is not defined"로 실제 크래시가 났다(실측). 그래서 storage kind 분기는 `import.meta.env.
+PUBLIC_KEYSTATIC_STORAGE`(민감하지 않은 플래그)로 하고, 진짜 시크릿 2개는 여전히
+`astro:env/server`의 `getSecret()`으로 서버에서만 읽는다.
+
+Vercel 프로덕션엔 이 4개를 Environment Variables에 설정(값은 사람이 직접 발급 — `docs/EVAL-KEYSTATIC.md`
+§7). 로컬 `.env`는 비워도 되고, 채우면 로컬에서도 GitHub 모드로 테스트 가능(실측: 값만 넣으면
+"Log in with GitHub" 화면이 뜨는 것까지 확인 — 실제 로그인은 진짜 OAuth App 필요).
+
+package.json scripts: `check`(astro check+lint+format:check+vitest --project unit), `build`(astro build — 어댑터가 있어 `/keystatic`·`/api/keystatic`만 온디맨드, 나머지는 그대로 정적), `verify`(vitest run --project verify — dist 필요), `dev`(astro dev, 시크릿 없으면 local 모드), `preview`(**`vite preview --outDir dist/client`**, `astro preview`가 아님 — 실측: `@astrojs/vercel` 어댑터는 `astro preview`를 아예 지원하지 않는다("The @astrojs/vercel adapter does not support the preview command"), 온디맨드 라우트가 있는 프로젝트는 어댑터별로 다른 방식이 필요하기 때문. `vite preview`는 `dist/client`의 정적 파일만 서빙하므로 **공개 페이지 시각 리뷰**(TESTING §5)엔 충분하지만 `/keystatic`은 못 띄운다 — `/keystatic`을 로컬에서 어댑터 포함해 통째로 재현하려면 Vercel의 `vercel dev` CLI가 필요(별도 로그인·프로젝트 연결 필요, 이 프로젝트엔 안 붙임).
 
 ## 7. 디렉터리 구조 (목표)
 

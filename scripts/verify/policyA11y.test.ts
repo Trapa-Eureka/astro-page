@@ -1,14 +1,14 @@
 import { mkdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { listAllDistFiles, listHtmlFiles, loadHtml, ROOT_DIR, urlPathFor } from './helpers';
+import { listHtmlFiles, loadHtml, ROOT_DIR, urlPathFor } from './helpers';
 
 // TESTING.md §4 "정책·접근성 기본"
 
 const PAGE_SIZE_BUDGET_BYTES = 100 * 1024;
-// astro.config.mjs's placeholder site — the only "external" origin dist is allowed to
-// reference (its own canonical/OG/RSS/sitemap URLs point at itself).
-const OWN_SITE_ORIGIN = 'https://makinilya-engineering.example';
+// astro.config.mjs's site — the only "external" origin dist is allowed to reference (its
+// own canonical/OG/RSS/sitemap URLs point at itself).
+const OWN_SITE_ORIGIN = 'https://astro-page-sigma.vercel.app';
 
 describe('images: alt text', () => {
   for (const file of listHtmlFiles()) {
@@ -63,21 +63,18 @@ describe('zero external-origin references', () => {
   });
 });
 
-// T8 hardens this beyond T7's path-only check. Note what it deliberately does NOT do: a
-// blind case-insensitive text scan for "keystatic" across dist. That was tried first and
-// false-positived on this site's own content — the seed post "Shipping a CMS Without
-// Losing Your Static Site" legitimately discusses Keystatic by name, so do its home-page
-// excerpt, its rss.xml entry, and its tag pages. Mentioning a product's name in prose is
-// not evidence its admin UI shipped. The real, false-positive-free signal is: no href/src
-// anywhere points at the /keystatic/ route, and no runtime exists that could render an
-// admin UI even if a route did — zero <script> tags, not just zero .js files (an inline
-// <script> would slip past a "no .js files" check entirely).
-describe('SKIP_KEYSTATIC wiring: no admin routes, no React runtime', () => {
-  it('no file path under dist contains "keystatic"', () => {
-    const offenders = listAllDistFiles().filter((f) => f.toLowerCase().includes('keystatic'));
-    expect(offenders).toEqual([]);
-  });
-
+// Policy since 2026-09-08 (GitHub-mode Keystatic, docs/DESIGN.md §1): public content pages
+// stay fully static and reference zero JS/keystatic assets, but the admin UI's own client
+// bundle (React + the Keystatic page component) now legitimately exists as static assets
+// under _astro/ — @astrojs/vercel serves /keystatic's client JS from there even though the
+// page itself is server-rendered on demand. So this no longer asserts "no keystatic path
+// and no .js file exists anywhere in dist" (verified: they do, e.g. _astro/keystatic-page.*.js,
+// ~2.7MB) — it asserts the thing that actually matters: no PUBLIC page links to any of it.
+// Also still avoids a blind text scan for "keystatic" — the seed post "Shipping a
+// CMS Without Losing Your Static Site" legitimately discusses Keystatic by name in its own
+// prose (home excerpt, rss.xml, tag pages), so mentioning the product isn't evidence of
+// its admin UI leaking into a page.
+describe('public pages ship zero JS and reference no keystatic asset', () => {
   it('no href/src in dist HTML points at the /keystatic/ admin route', () => {
     const offenders: string[] = [];
     for (const file of listHtmlFiles()) {
@@ -94,12 +91,24 @@ describe('SKIP_KEYSTATIC wiring: no admin routes, no React runtime', () => {
     expect(offenders, offenders.join('\n')).toEqual([]);
   });
 
-  it('dist ships zero JavaScript files (fully static — no React/admin runtime chunk)', () => {
-    const jsFiles = listAllDistFiles().filter((f) => f.endsWith('.js'));
-    expect(jsFiles, jsFiles.join('\n')).toEqual([]);
+  it('no public page references a .js file (via href/src) or a keystatic-named asset', () => {
+    const offenders: string[] = [];
+    for (const file of listHtmlFiles()) {
+      const $ = loadHtml(file);
+      $('[href], [src]').each((_, el) => {
+        for (const attr of ['href', 'src']) {
+          const value = $(el).attr(attr);
+          if (!value) continue;
+          if (value.endsWith('.js') || value.toLowerCase().includes('keystatic')) {
+            offenders.push(`${urlPathFor(file)}: ${attr}="${value}"`);
+          }
+        }
+      });
+    }
+    expect(offenders, offenders.join('\n')).toEqual([]);
   });
 
-  it('dist HTML has zero <script> tags (not just zero .js files — an inline script would evade that check)', () => {
+  it('dist HTML has zero <script> tags on any public page', () => {
     const offenders: string[] = [];
     for (const file of listHtmlFiles()) {
       const $ = loadHtml(file);
